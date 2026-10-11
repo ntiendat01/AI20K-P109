@@ -1,0 +1,468 @@
+{
+  "step": 7,
+  "node_name": "evaluate",
+  "node_output": {
+    "workflow_status": "technical_failure",
+    "evaluation_result": {
+      "code": "EVALUATION_CONTEXT_NOT_CONFIGURED"
+    }
+  },
+  "cumulative_state": {
+    "pr_data": {
+      "pr_number": "PR-TEST-AUTO",
+      "quantity": 2000.0,
+      "target_uom": "cái",
+      "target_currency": "VND"
+    },
+    "documents": [
+      "V:\\02_VietNhat_Quotation.pdf",
+      "V:\\01_HoaPhat_Quotation.pdf"
+    ],
+    "raw_extractions": [
+      {
+        "extraction_id": "4a2838c7-80f5-5f0f-a8e0-635a700631fe",
+        "source": {
+          "document_id": null,
+          "document_path": "V:\\02_VietNhat_Quotation.pdf",
+          "filename": "02_VietNhat_Quotation.pdf",
+          "page_number": 1,
+          "source_text": "CONG TY CÖ PHAN THÉP VIET NHAT\nKhu cöng nghiép Quang Minh, Ha Nöi, Viét Nam\nMST: 0107654321 Dién thoai: 0912 333 444\nBANG BAO GIA THÉP XAY DU'NG\nSö bäo gia\nVNJ/QT/2026/103\nNgay\n03/10/2026\nKhàch hang\nKhàch häng du än P-109\nHiéu luc\n10 ngay\nNgui phu\nTran Quöc Huy\nLién hé\n0912333444\nträch\nSTT\nMat hang / Quy cäch\nNhän hiéu\nSL\nDVT\nDon giá (VND)\nThänh tién (VND)\nThép thanh vän D16\n1\nViét Nhat\nCB400-V, TCVN 1651-2:2018\n20\ntn\n15.050.000\n301.000.000\nTam tinh\n301.000.000\nVAT\n10%  30.100.000\nVän chuyén\n6.000.000\nTÖNG THANH TOAN\n337.100.000 VND\nDIÉU KHOAN THUONG MAI\nThanh toän\nThanh toän 50% khi ky don; 50% trong 3 ngay sau nghi@m thu\nGiao hang\n5-7 ngay lam viec sau khi nhan dat coc\nBäo hanh\n18 thäng; báo hanh chat lugng thép theo tiéu chuan cng bö cüa nha sán xuat\nGhi chü\nPhi van chuyén dá tinh riéng. Böc d tai cöng trinh do bén mua bó tri.\nDAI DIEN NHA CUNG CAP\nTran Quöc Huy",
+          "bbox": null
+        },
+        "supplier_id": "Viet Nhat",
+        "item_name": "Thép thanh ven D16",
+        "unit_price": 15050000.0,
+        "quantity": 20.0,
+        "unit": "tn",
+        "currency": "VND",
+        "vat_rate": 0.1,
+        "vat_included": false,
+        "surcharges": [
+          {
+            "kind": "shipping",
+            "description": "Văn chuyén",
+            "amount": 6000000.0,
+            "currency": "VND",
+            "included_in_tco": true,
+            "source": null,
+            "normalized_amount": null,
+            "normalized_currency": null,
+            "requires_manual_conversion": false
+          }
+        ],
+        "warranty_months": null,
+        "lead_time_days": null,
+        "lead_time_min": 5,
+        "lead_time_max": 7,
+        "lead_time_unit": "days",
+        "confidence_score": 0.5,
+        "field_confidence": {},
+        "field_needs_confirmation": {
+          "confidence_score": false
+        },
+        "needs_confirmation": false,
+        "confirmed_by_human": true,
+        "extraction_error": null
+      },
+      {
+        "extraction_id": "5a55ae8b-3052-5c94-9031-0a82cf7ab50a",
+        "source": {
+          "document_id": null,
+          "document_path": "V:\\01_HoaPhat_Quotation.pdf",
+          "filename": "01_HoaPhat_Quotation.pdf",
+          "page_number": 1,
+          "source_text": "Sät xäy dung D16 CB400-V\n1\nThép thanh ven, tiéu chuän\nHoa Phät\n20\n tn\n15.200.000\n304.000.000",
+          "bbox": null
+        },
+        "supplier_id": "CONG TY TNHH THÉP HOA PHAT VIET NAM",
+        "item_name": "Sät xäy dung D16 CB400-V, Thép thanh ven, tiéu chuän",
+        "unit_price": 15200000.0,
+        "quantity": 20.0,
+        "unit": "tn",
+        "currency": "VND",
+        "vat_rate": 0.1,
+        "vat_included": false,
+        "surcharges": [],
+        "warranty_months": 12,
+        "lead_time_days": null,
+        "lead_time_min": 3,
+        "lead_time_max": 5,
+        "lead_time_unit": "days",
+        "confidence_score": 0.5,
+        "field_confidence": {},
+        "field_needs_confirmation": {
+          "confidence_score": false
+        },
+        "needs_confirmation": false,
+        "confirmed_by_human": true,
+        "extraction_error": null
+      }
+    ],
+    "review_mode": "mandatory",
+    "normalized_quotes": [
+      {
+        "supplier_id": "Viet Nhat",
+        "items": [
+          {
+            "extraction_id": "4a2838c7-80f5-5f0f-a8e0-635a700631fe",
+            "source": {
+              "document_id": null,
+              "document_path": "V:\\02_VietNhat_Quotation.pdf",
+              "filename": "02_VietNhat_Quotation.pdf",
+              "page_number": 1,
+              "source_text": "CONG TY CÖ PHAN THÉP VIET NHAT\nKhu cöng nghiép Quang Minh, Ha Nöi, Viét Nam\nMST: 0107654321 Dién thoai: 0912 333 444\nBANG BAO GIA THÉP XAY DU'NG\nSö bäo gia\nVNJ/QT/2026/103\nNgay\n03/10/2026\nKhàch hang\nKhàch häng du än P-109\nHiéu luc\n10 ngay\nNgui phu\nTran Quöc Huy\nLién hé\n0912333444\nträch\nSTT\nMat hang / Quy cäch\nNhän hiéu\nSL\nDVT\nDon giá (VND)\nThänh tién (VND)\nThép thanh vän D16\n1\nViét Nhat\nCB400-V, TCVN 1651-2:2018\n20\ntn\n15.050.000\n301.000.000\nTam tinh\n301.000.000\nVAT\n10%  30.100.000\nVän chuyén\n6.000.000\nTÖNG THANH TOAN\n337.100.000 VND\nDIÉU KHOAN THUONG MAI\nThanh toän\nThanh toän 50% khi ky don; 50% trong 3 ngay sau nghi@m thu\nGiao hang\n5-7 ngay lam viec sau khi nhan dat coc\nBäo hanh\n18 thäng; báo hanh chat lugng thép theo tiéu chuan cng bö cüa nha sán xuat\nGhi chü\nPhi van chuyén dá tinh riéng. Böc d tai cöng trinh do bén mua bó tri.\nDAI DIEN NHA CUNG CAP\nTran Quöc Huy",
+              "bbox": null
+            },
+            "supplier_id": "Viet Nhat",
+            "item_name": "Thép thanh ven D16",
+            "unit_price": 15050000.0,
+            "quantity": 20.0,
+            "unit": "tn",
+            "currency": "VND",
+            "vat_rate": 0.1,
+            "vat_included": false,
+            "surcharges": [
+              {
+                "kind": "shipping",
+                "description": "Văn chuyén",
+                "amount": 6000000.0,
+                "currency": "VND",
+                "included_in_tco": true,
+                "source": null,
+                "normalized_amount": 6000000.0,
+                "normalized_currency": "VND",
+                "requires_manual_conversion": false
+              }
+            ],
+            "warranty_months": null,
+            "lead_time_days": null,
+            "lead_time_min": 5,
+            "lead_time_max": 7,
+            "lead_time_unit": "days",
+            "confidence_score": 0.5,
+            "field_confidence": {},
+            "field_needs_confirmation": {
+              "confidence_score": false
+            },
+            "needs_confirmation": false,
+            "confirmed_by_human": true,
+            "extraction_error": null,
+            "normalized_quantity": 20.0,
+            "normalized_uom": "cái",
+            "normalized_unit_price": null,
+            "normalized_currency": "VND",
+            "requires_manual_conversion": true,
+            "conversion_note": "Cần quy đổi thủ công"
+          }
+        ],
+        "has_manual_conversion": true,
+        "needs_confirmation": false,
+        "confirmed_by_human": true
+      },
+      {
+        "supplier_id": "CONG TY TNHH THÉP HOA PHAT VIET NAM",
+        "items": [
+          {
+            "extraction_id": "5a55ae8b-3052-5c94-9031-0a82cf7ab50a",
+            "source": {
+              "document_id": null,
+              "document_path": "V:\\01_HoaPhat_Quotation.pdf",
+              "filename": "01_HoaPhat_Quotation.pdf",
+              "page_number": 1,
+              "source_text": "Sät xäy dung D16 CB400-V\n1\nThép thanh ven, tiéu chuän\nHoa Phät\n20\n tn\n15.200.000\n304.000.000",
+              "bbox": null
+            },
+            "supplier_id": "CONG TY TNHH THÉP HOA PHAT VIET NAM",
+            "item_name": "Sät xäy dung D16 CB400-V, Thép thanh ven, tiéu chuän",
+            "unit_price": 15200000.0,
+            "quantity": 20.0,
+            "unit": "tn",
+            "currency": "VND",
+            "vat_rate": 0.1,
+            "vat_included": false,
+            "surcharges": [],
+            "warranty_months": 12,
+            "lead_time_days": null,
+            "lead_time_min": 3,
+            "lead_time_max": 5,
+            "lead_time_unit": "days",
+            "confidence_score": 0.5,
+            "field_confidence": {},
+            "field_needs_confirmation": {
+              "confidence_score": false
+            },
+            "needs_confirmation": false,
+            "confirmed_by_human": true,
+            "extraction_error": null,
+            "normalized_quantity": 20.0,
+            "normalized_uom": "cái",
+            "normalized_unit_price": null,
+            "normalized_currency": "VND",
+            "requires_manual_conversion": true,
+            "conversion_note": "Cần quy đổi thủ công"
+          }
+        ],
+        "has_manual_conversion": true,
+        "needs_confirmation": false,
+        "confirmed_by_human": true
+      }
+    ],
+    "tco_results": [
+      {
+        "supplier_id": "Viet Nhat",
+        "items_tco": [
+          {
+            "item_name": "Thép thanh ven D16",
+            "quantity": 20.0,
+            "unit_price": null,
+            "subtotal": 0.0,
+            "surcharges": 6000000.0,
+            "vat_rate": 0.1,
+            "vat_included": false,
+            "item_tco": null
+          }
+        ],
+        "subtotal": 0.0,
+        "total_surcharges": 6000000.0,
+        "total_vat": 0.0,
+        "total_tco": null,
+        "status": "missing_data",
+        "missing_fields": [
+          "items[0].unit_price"
+        ]
+      },
+      {
+        "supplier_id": "CONG TY TNHH THÉP HOA PHAT VIET NAM",
+        "items_tco": [
+          {
+            "item_name": "Sät xäy dung D16 CB400-V, Thép thanh ven, tiéu chuän",
+            "quantity": 20.0,
+            "unit_price": null,
+            "subtotal": 0.0,
+            "surcharges": 0.0,
+            "vat_rate": 0.1,
+            "vat_included": false,
+            "item_tco": null
+          }
+        ],
+        "subtotal": 0.0,
+        "total_surcharges": 0.0,
+        "total_vat": 0.0,
+        "total_tco": null,
+        "status": "missing_data",
+        "missing_fields": [
+          "items[0].unit_price"
+        ]
+      }
+    ],
+    "comparison_matrix": {
+      "suppliers": [
+        "Viet Nhat",
+        "CONG TY TNHH THÉP HOA PHAT VIET NAM"
+      ],
+      "criteria": [
+        "total_tco",
+        "lead_time_days",
+        "warranty_months"
+      ],
+      "matrix": {
+        "Viet Nhat": {
+          "total_tco": {
+            "value": "Thiếu dữ liệu",
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Thiếu dữ liệu"
+          },
+          "lead_time_days": {
+            "value": "Thiếu dữ liệu",
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Thiếu dữ liệu"
+          },
+          "warranty_months": {
+            "value": "Thiếu dữ liệu",
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Thiếu dữ liệu"
+          }
+        },
+        "CONG TY TNHH THÉP HOA PHAT VIET NAM": {
+          "total_tco": {
+            "value": "Thiếu dữ liệu",
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Thiếu dữ liệu"
+          },
+          "lead_time_days": {
+            "value": "Thiếu dữ liệu",
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Thiếu dữ liệu"
+          },
+          "warranty_months": {
+            "value": 12.0,
+            "deviation_pct": null,
+            "highlight": false,
+            "note": "Không đủ dữ liệu so sánh"
+          }
+        }
+      },
+      "means": {
+        "total_tco": null,
+        "lead_time_days": null,
+        "warranty_months": 12.0
+      },
+      "deviation_threshold": 0.15
+    },
+    "risk_flags": [
+      {
+        "supplier_id": "Viet Nhat",
+        "risk_type": "lead_time_missing",
+        "severity": "warning",
+        "message": "Thiếu thông tin thời gian giao hàng (lead time)",
+        "detail": {},
+        "source": null
+      },
+      {
+        "supplier_id": "CONG TY TNHH THÉP HOA PHAT VIET NAM",
+        "risk_type": "lead_time_missing",
+        "severity": "warning",
+        "message": "Thiếu thông tin thời gian giao hàng (lead time)",
+        "detail": {},
+        "source": null
+      }
+    ],
+    "human_feedback": {
+      "response": "Looks good, proceed."
+    },
+    "decision_proposal": {
+      "decision": {
+        "type": "needs_input",
+        "preferred_supplier_id": null,
+        "summary": "Insufficient data to compute total cost of ownership (TCO) and compare suppliers.",
+        "supporting_claim_ids": [],
+        "reason_codes": [
+          "INSUFFICIENT_DATA"
+        ],
+        "uncertainty_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4"
+        ]
+      },
+      "recommendation": {
+        "top_n": 3,
+        "ranked": [],
+        "shortfall": null
+      },
+      "claims": [],
+      "comparisons": [],
+      "trade_offs": [],
+      "negotiation_points": [],
+      "risk_flags": [
+        {
+          "risk_id": "RF1",
+          "supplier_ids": [
+            "Viet Nhat"
+          ],
+          "risk_type": "lead_time_missing",
+          "knowledge_status": "unknown",
+          "severity": "warning",
+          "claim_ids": [],
+          "uncertainty_ids": [],
+          "suggested_action": "Obtain lead time information"
+        },
+        {
+          "risk_id": "RF2",
+          "supplier_ids": [
+            "CONG TY TNHH THÉP HOA PHAT VIET NAM"
+          ],
+          "risk_type": "lead_time_missing",
+          "knowledge_status": "unknown",
+          "severity": "warning",
+          "claim_ids": [],
+          "uncertainty_ids": [],
+          "suggested_action": "Obtain lead time information"
+        }
+      ],
+      "uncertainties": [
+        {
+          "uncertainty_id": "U1",
+          "supplier_ids": [
+            "Viet Nhat"
+          ],
+          "description": "Missing unit price for item Thép thanh ven D16.",
+          "impact": "Unable to calculate TCO.",
+          "suggested_criticality": "critical",
+          "proposed_action": "Obtain unit price from supplier.",
+          "proposed_owner": "buyer"
+        },
+        {
+          "uncertainty_id": "U2",
+          "supplier_ids": [
+            "CONG TY TNHH THÉP HOA PHAT VIET NAM"
+          ],
+          "description": "Missing unit price for item Sät xäy dung D16 CB400-V.",
+          "impact": "Unable to calculate TCO.",
+          "suggested_criticality": "critical",
+          "proposed_action": "Obtain unit price from supplier.",
+          "proposed_owner": "buyer"
+        },
+        {
+          "uncertainty_id": "U3",
+          "supplier_ids": [
+            "Viet Nhat"
+          ],
+          "description": "Missing lead time information for Viet Nhat.",
+          "impact": "Unable to assess delivery schedule.",
+          "suggested_criticality": "critical",
+          "proposed_action": "Request lead time from supplier.",
+          "proposed_owner": "buyer"
+        },
+        {
+          "uncertainty_id": "U4",
+          "supplier_ids": [
+            "CONG TY TNHH THÉP HOA PHAT VIET NAM"
+          ],
+          "description": "Missing lead time information for CONG TY TNHH THÉP HOA PHAT VIET NAM.",
+          "impact": "Unable to assess delivery schedule.",
+          "suggested_criticality": "critical",
+          "proposed_action": "Request lead time from supplier.",
+          "proposed_owner": "buyer"
+        }
+      ],
+      "open_questions": [
+        {
+          "question_id": "Q1",
+          "supplier_ids": [
+            "Viet Nhat"
+          ],
+          "uncertainty_ids": [
+            "U1",
+            "U3"
+          ],
+          "question": "What is the unit price for Thép thanh ven D16?",
+          "proposed_owner": "buyer"
+        },
+        {
+          "question_id": "Q2",
+          "supplier_ids": [
+            "CONG TY TNHH THÉP HOA PHAT VIET NAM"
+          ],
+          "uncertainty_ids": [
+            "U2",
+            "U4"
+          ],
+          "question": "What is the unit price for Sät xäy dung D16 CB400-V?",
+          "proposed_owner": "buyer"
+        }
+      ],
+      "assumptions": []
+    },
+    "evaluation_result": {
+      "code": "EVALUATION_CONTEXT_NOT_CONFIGURED"
+    },
+    "workflow_status": "technical_failure"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "decision": {
+    "type": "ranked_recommendation",
+    "preferred_supplier_id": "A",
+    "summary": "Ưu tiên A theo tổng chi phí và thời gian giao; B có bảo hành dài hơn.",
+    "supporting_claim_ids": [
+      "cl-A-cost",
+      "cl-A-lowest-cost",
+      "cl-A-delivery",
+      "cl-A-fastest",
+      "cl-B-warranty"
+    ],
+    "reason_codes": [
+      "LOWER_TOTAL_COST",
+      "SHORTER_DELIVERY"
+    ],
+    "uncertainty_ids": [
+      "unc-quality"
+    ]
+  },
+  "recommendation": {
+    "top_n": 3,
+    "ranked": [
+      {
+        "rank": 1,
+        "supplier_id": "A",
+        "supplier_name": "Vendor A",
+        "rationale": "TCO 12.000 USD, thấp nhất trong scope; giao 5 ngày, nhanh nhất trong scope.",
+        "rationale_claim_ids": [
+          "cl-A-cost",
+          "cl-A-lowest-cost",
+          "cl-A-delivery",
+          "cl-A-fastest"
+        ],
+        "comparison_ids": [
+          "cmp-cost",
+          "cmp-delivery",
+          "cmp-warranty"
+        ],
+        "trade_off_ids": [
+          "trade-warranty"
+        ],
+        "risk_ids": [
+          "risk-quality-gap"
+        ],
+        "uncertainty_ids": [
+          "unc-quality"
+        ],
+        "evidence": []
+      },
+      {
+        "rank": 2,
+        "supplier_id": "B",
+        "supplier_name": "Vendor B",
+        "rationale": "TCO 14.500 USD và giao 7 ngày; bảo hành 24 tháng so với 12 tháng của A.",
+        "rationale_claim_ids": [
+          "cl-B-cost",
+          "cl-B-delivery",
+          "cl-B-warranty"
+        ],
+        "comparison_ids": [
+          "cmp-cost",
+          "cmp-delivery",
+          "cmp-warranty"
+        ],
+        "trade_off_ids": [
+          "trade-warranty"
+        ],
+        "risk_ids": [
+          "risk-quality-gap"
+        ],
+        "uncertainty_ids": [
+          "unc-quality"
+        ],
+        "evidence": []
+      }
+    ],
+    "shortfall": {
+      "requested_count": 3,
+      "available_count": 2,
+      "returned_count": 2,
+      "reason_code": "AVAILABLE_CANDIDATES_BELOW_REQUESTED_TOP_N"
+    }
+  },
+  "claims": [
+    {
+      "claim_id": "cl-A-cost",
+      "category": "quantitative",
+      "supplier_ids": [
+        "A"
+      ],
+      "text": "TCO của A là 12.000 USD.",
+      "predicate": {
+        "operator": "equals",
+        "metric": "tco",
+        "value": "12000.00",
+        "unit": "USD"
+      },
+      "source_hints": [
+        "Goods total and shipping charge in Vendor A quotation"
+      ],
+      "calculation_hints": [
+        "sum_declared_tax_inclusive_components"
+      ]
+    },
+    {
+      "claim_id": "cl-A-lowest-cost",
+      "category": "comparison",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "text": "A có TCO thấp nhất trong scope.",
+      "predicate": {
+        "operator": "minimum",
+        "metric": "tco",
+        "subject_supplier_id": "A",
+        "tie_handling": "disclose"
+      },
+      "source_hints": [
+        "Totals for every supplier in the comparison scope"
+      ],
+      "calculation_hints": []
+    },
+    {
+      "claim_id": "cl-A-delivery",
+      "category": "quantitative",
+      "supplier_ids": [
+        "A"
+      ],
+      "text": "A giao hàng trong 5 ngày lịch sau xác nhận đơn hàng.",
+      "predicate": {
+        "operator": "equals",
+        "metric": "delivery_days",
+        "value": "5",
+        "unit": "calendar_day",
+        "time_origin": "order_confirmation"
+      },
+      "source_hints": [
+        "Vendor A delivery commitment"
+      ],
+      "calculation_hints": []
+    },
+    {
+      "claim_id": "cl-A-fastest",
+      "category": "comparison",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "text": "A có thời gian giao ngắn nhất trong scope.",
+      "predicate": {
+        "operator": "minimum",
+        "metric": "delivery_days",
+        "subject_supplier_id": "A",
+        "tie_handling": "disclose"
+      },
+      "source_hints": [
+        "Delivery commitments for every supplier in the comparison scope"
+      ],
+      "calculation_hints": []
+    },
+    {
+      "claim_id": "cl-B-cost",
+      "category": "quantitative",
+      "supplier_ids": [
+        "B"
+      ],
+      "text": "TCO của B là 14.500 USD.",
+      "predicate": {
+        "operator": "equals",
+        "metric": "tco",
+        "value": "14500.00",
+        "unit": "USD"
+      },
+      "source_hints": [
+        "Goods total and shipping charge in Vendor B quotation"
+      ],
+      "calculation_hints": [
+        "sum_declared_tax_inclusive_components"
+      ]
+    },
+    {
+      "claim_id": "cl-B-delivery",
+      "category": "quantitative",
+      "supplier_ids": [
+        "B"
+      ],
+      "text": "B giao hàng trong 7 ngày lịch sau xác nhận đơn hàng.",
+      "predicate": {
+        "operator": "equals",
+        "metric": "delivery_days",
+        "value": "7",
+        "unit": "calendar_day",
+        "time_origin": "order_confirmation"
+      },
+      "source_hints": [
+        "Vendor B delivery commitment"
+      ],
+      "calculation_hints": []
+    },
+    {
+      "claim_id": "cl-B-warranty",
+      "category": "comparison",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "text": "B bảo hành 24 tháng; A bảo hành 12 tháng.",
+      "predicate": {
+        "operator": "greater_than",
+        "metric": "warranty_months",
+        "subject_supplier_id": "B",
+        "other_supplier_id": "A"
+      },
+      "source_hints": [
+        "Warranty terms for A and B"
+      ],
+      "calculation_hints": []
+    }
+  ],
+  "comparisons": [
+    {
+      "comparison_id": "cmp-cost",
+      "criterion": "tco",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "claim_ids": [
+        "cl-A-cost",
+        "cl-B-cost",
+        "cl-A-lowest-cost"
+      ],
+      "coverage": "complete"
+    },
+    {
+      "comparison_id": "cmp-delivery",
+      "criterion": "delivery_days",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "claim_ids": [
+        "cl-A-delivery",
+        "cl-B-delivery",
+        "cl-A-fastest"
+      ],
+      "coverage": "complete"
+    },
+    {
+      "comparison_id": "cmp-warranty",
+      "criterion": "warranty_months",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "claim_ids": [
+        "cl-B-warranty"
+      ],
+      "coverage": "complete"
+    }
+  ],
+  "trade_offs": [
+    {
+      "trade_off_id": "trade-warranty",
+      "preferred_supplier_id": "A",
+      "alternative_supplier_id": "B",
+      "benefit_claim_ids": [
+        "cl-A-lowest-cost",
+        "cl-A-fastest"
+      ],
+      "cost_claim_ids": [
+        "cl-B-warranty"
+      ],
+      "uncertainty_ids": [
+        "unc-quality"
+      ],
+      "text": "Chọn A ưu tiên chi phí và tốc độ; buyer cần cân nhắc lợi ích bảo hành của B."
+    }
+  ],
+  "negotiation_points": [
+    {
+      "negotiation_id": "neg-A-warranty",
+      "supplier_id": "A",
+      "kind": "suggestion",
+      "action": "Đề nghị A kéo dài bảo hành.",
+      "basis_claim_ids": [
+        "cl-B-warranty"
+      ],
+      "expected_outcome": null
+    }
+  ],
+  "risk_flags": [
+    {
+      "risk_id": "risk-quality-gap",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "risk_type": "quality_information_gap",
+      "knowledge_status": "unknown",
+      "severity": "unknown",
+      "claim_ids": [],
+      "uncertainty_ids": [
+        "unc-quality"
+      ],
+      "suggested_action": "Không ưu tiên NCC nào dựa trên xếp hạng chất lượng chưa có dữ liệu."
+    }
+  ],
+  "uncertainties": [
+    {
+      "uncertainty_id": "unc-quality",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "description": "Chưa có xếp hạng chất lượng được xác minh.",
+      "impact": "Không thể kết luận B có chất lượng cao hơn A.",
+      "suggested_criticality": "noncritical",
+      "proposed_action": "disclose_and_exclude_from_scoring"
+    }
+  ],
+  "open_questions": [
+    {
+      "question_id": "question-quality",
+      "supplier_ids": [
+        "A",
+        "B"
+      ],
+      "uncertainty_ids": [
+        "unc-quality"
+      ],
+      "question": "Có đánh giá chất lượng độc lập để bổ sung không?",
+      "proposed_owner": "buyer"
+    }
+  ],
+  "assumptions": []
+}

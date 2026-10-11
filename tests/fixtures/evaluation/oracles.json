@@ -1,0 +1,40 @@
+[
+  {
+    "name": "valid",
+    "expected_status": "ready_for_review"
+  },
+  {
+    "name": "unsupported_numeric",
+    "expected_status": "repairable",
+    "expected_code": "TCO_CLAIM_MISMATCH"
+  },
+  {
+    "name": "missing_evidence",
+    "expected_status": "needs_input",
+    "expected_code": "MANDATORY_SOURCE_UNRESOLVED"
+  },
+  {
+    "name": "wrong_supplier",
+    "expected_status": "technical_failure",
+    "expected_code": "SOURCE_INTEGRITY"
+  },
+  {
+    "name": "wrong_revision",
+    "expected_status": "technical_failure",
+    "expected_code": "SOURCE_INTEGRITY"
+  },
+  {
+    "name": "no_viable",
+    "expected_status": "no_viable_supplier",
+    "expected_code": "NO_VIABLE_SUPPLIER"
+  },
+  {
+    "name": "unavailable_advantage",
+    "expected_status": "repairable",
+    "expected_code": "UNAVAILABLE_DATA_ADVANTAGE"
+  },
+  {
+    "name": "stale_approval",
+    "expected_error": "ReviewConflictError"
+  }
+]

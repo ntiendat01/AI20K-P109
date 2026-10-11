@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "langsmith-trace": {
+      "source": "langchain-ai/langsmith-skills",
+      "sourceType": "github",
+      "skillPath": "config/skills/langsmith-trace/SKILL.md",
+      "computedHash": "6b47689e6c44f0acf61d1384684170b69316bce0ed4d3185a4e91ce5aad5c0f1"
+    }
+  }
+}

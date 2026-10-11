@@ -1,0 +1,21 @@
+services: 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      # Development: serve UI directly from the working tree. This makes every
+      # saved frontend change visible after refresh, without relying on a
+      # previously built image.
+      - ./frontend:/app/frontend:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

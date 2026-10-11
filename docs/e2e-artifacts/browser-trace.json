@@ -1,0 +1,259 @@
+{
+  "result": "passed",
+  "provider": "fixture (OCR native, extraction/decision models fake)",
+  "pr_id": "a910187c-acda-40bd-b1cc-8623824d9f99",
+  "url": "http://127.0.0.1:8019/ui/#/po/25c19416-702e-58e5-92fb-2a01d1343c9c",
+  "trace": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/prs",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/quotations/e8c04c1a-c270-42bf-9ee5-a28b06bb5907",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/quotations/e8c04c1a-c270-42bf-9ee5-a28b06bb5907/confirm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/quotations/d23a16e4-d658-4e2b-9a49-4d0751e11bcf",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/quotations/d23a16e4-d658-4e2b-9a49-4d0751e11bcf/confirm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/quotations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/review",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/review",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/submit-approval",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/review",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 204
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/approvals",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/approvals",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/prs/a910187c-acda-40bd-b1cc-8623824d9f99/analysis",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/review",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/sources/d23a16e4-d658-4e2b-9a49-4d0751e11bcf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recommendations/4af29b70-f12e-44fe-ab73-a6839b77a453/feedback",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/25c19416-702e-58e5-92fb-2a01d1343c9c",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/25c19416-702e-58e5-92fb-2a01d1343c9c",
+      "status": 200
+    }
+  ],
+  "page_errors": []
+}

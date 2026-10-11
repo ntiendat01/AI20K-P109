@@ -1,0 +1,17 @@
+{
+  "step": 0,
+  "node_name": "initial_state",
+  "node_output": {
+    "documents": [
+      "V:\\02_VietNhat_Quotation.pdf",
+      "V:\\01_HoaPhat_Quotation.pdf"
+    ],
+    "pr_data": {
+      "pr_number": "PR-TEST-AUTO",
+      "quantity": 2000.0,
+      "target_uom": "cái",
+      "target_currency": "VND"
+    },
+    "top_n": 3
+  }
+}

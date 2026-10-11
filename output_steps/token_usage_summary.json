@@ -1,0 +1,28 @@
+{
+  "summary": {
+    "total_calls": 2,
+    "total_input_tokens": 1389,
+    "total_output_tokens": 4989,
+    "total_tokens": 6378
+  },
+  "calls": [
+    {
+      "stage": "Extraction (02_VietNhat_Quotation.pdf)",
+      "model": "openai/gpt-oss-20b",
+      "input_tokens": 712,
+      "output_tokens": 3321,
+      "total_tokens": 4033,
+      "source": "api_reported",
+      "notes": "Document: V:\\02_VietNhat_Quotation.pdf"
+    },
+    {
+      "stage": "Extraction (01_HoaPhat_Quotation.pdf)",
+      "model": "openai/gpt-oss-20b",
+      "input_tokens": 677,
+      "output_tokens": 1668,
+      "total_tokens": 2345,
+      "source": "api_reported",
+      "notes": "Document: V:\\01_HoaPhat_Quotation.pdf"
+    }
+  ]
+}

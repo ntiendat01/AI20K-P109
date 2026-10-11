@@ -1,0 +1,72 @@
+{
+  "dataset": "anonymous hand-computable fixtures; six inputs, repeated trials are not independent examples",
+  "backend": "Chroma API-shaped offline fake; see test_evaluation_chroma.py for real database integration",
+  "retrieval_k": 8,
+  "cache": false,
+  "concurrency": 1,
+  "cases": [
+    {
+      "case": "valid",
+      "trials": 40,
+      "statuses": [
+        "ready_for_review"
+      ],
+      "p50_ms": 5.916,
+      "p95_ms": 8.898
+    },
+    {
+      "case": "wrong_number",
+      "trials": 40,
+      "statuses": [
+        "repairable"
+      ],
+      "p50_ms": 6.268,
+      "p95_ms": 14.584
+    },
+    {
+      "case": "missing_source",
+      "trials": 40,
+      "statuses": [
+        "needs_input"
+      ],
+      "p50_ms": 5.59,
+      "p95_ms": 7.118
+    },
+    {
+      "case": "wrong_unit",
+      "trials": 40,
+      "statuses": [
+        "needs_input"
+      ],
+      "p50_ms": 6.214,
+      "p95_ms": 7.956
+    },
+    {
+      "case": "conflicting_source",
+      "trials": 40,
+      "statuses": [
+        "repairable"
+      ],
+      "p50_ms": 6.457,
+      "p95_ms": 7.617
+    },
+    {
+      "case": "wrong_time_origin",
+      "trials": 40,
+      "statuses": [
+        "repairable"
+      ],
+      "p50_ms": 5.726,
+      "p95_ms": 6.675
+    }
+  ],
+  "total_trials": 240,
+  "unsupported_claim_trials": 200,
+  "false_support_count": 0,
+  "false_support_rate": 0.0,
+  "p50_ms": 6.016,
+  "p95_ms": 7.981,
+  "stalled_repair_calls": 1,
+  "stalled_repair_action": "ESCALATE_REPAIR_LIMIT",
+  "baseline": "Previous evaluate node was pass-through; no comparable grounding metric. make eval is a no-op (no target)."
+}
