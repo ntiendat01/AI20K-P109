@@ -10,9 +10,9 @@ from unittest.mock import Mock
 from src.agents.graph import build_graph
 from src.agents.nodes.decision_llm import BUYER_DECISION_FAILURE_MESSAGE, decision_proposal
 from src.core.config import Settings
-from src.services.evaluation.engine import Evaluator
-from src.services.evaluation.store import EvaluationStore
-from src.services.evaluation.workflow import EvaluationWorkflow
+from src.application.evaluation.engine import Evaluator
+from src.infrastructure.evaluation.store import EvaluationStore
+from src.application.evaluation.workflow import EvaluationWorkflow
 from tests.fixtures.evaluation_cases import adapter, context, proposal
 
 decision_module = importlib.import_module("src.agents.nodes.decision_llm")

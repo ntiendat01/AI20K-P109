@@ -6,12 +6,12 @@ from uuid import NAMESPACE_URL, uuid5
 
 from src.agents.state import ProcurementAgentState
 from src.agents.tools.normalize_data import FX_RATES_TO_VND, UOM_CONVERSION_TABLE
-from src.models_v1.analysis.normalization import (
+from src.domain.agent.analysis.normalization import (
     NormalizationStatus,
     NormalizedItem,
     NormalizedQuotationArtifact,
 )
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
 
 NORMALIZATION_RULE_VERSION: Final = "uom-fx-v1"
 MONEY_QUANTUM: Final = Decimal("0.01")

@@ -52,13 +52,20 @@ source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Với PDF scan, chạy OCR service riêng (PaddleOCR chỉ được cài trong service này):
+
+```bash
+docker compose up ocr
+```
+
 ### 3. Cấu hình biến môi trường
 
 ```bash
 cp .env.example .env
 ```
 
-Mở `.env` và điền `OPENAI_API_KEY`. Riêng `AI_LOG_API_KEY`, mỗi thành viên tự
+Mở `.env` và điền `OPENAI_API_KEY`; giữ `OCR_SERVICE_BASE_URL` trỏ tới OCR
+service (mặc định `http://localhost:8080`). Riêng `AI_LOG_API_KEY`, mỗi thành viên tự
 tạo key riêng tại [dashboard Phoenix](https://phoenix.note.transformerlabs.ai/api-keys)
 rồi thay vào chỗ `<get-your-api-key-from-dashboard-phoenix>` — giá trị trong
 `.env.example` chỉ là placeholder, để nguyên thì log không vào được hệ thống chấm.
@@ -107,7 +114,7 @@ presentation/        Slide và video Demo Day
 .claude/ .codex/ .cursor/ .gemini/ .agents/ .github/hooks/
                      Config hook cho từng công cụ
 .github/workflows/   CI
-Dockerfile           Multi-stage build
+src/Dockerfile       Multi-stage backend build
 docker-compose.yml   Chạy backend bằng Docker
 README_boilerplate.md  Khung README cho dự án của đội
 ```

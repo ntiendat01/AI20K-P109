@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from src.models.evaluation import (
+from src.domain.analysis.evaluation import (
     Actor,
     Chunk,
     DecisionProposal,
@@ -12,7 +12,7 @@ from src.models.evaluation import (
     SourceFact,
     SourceScope,
 )
-from src.services.evaluation.evidence import ChromaEvidenceAdapter, content_hash
+from src.infrastructure.evaluation.evidence import ChromaEvidenceAdapter, content_hash
 
 
 def proposal() -> DecisionProposal:

@@ -8,15 +8,15 @@ from pathlib import Path
 
 import pytest
 
+from src.application.procurement.workflow import ProcurementWorkflow
 from src.main import app
-from src.services.procurement.workflow import ProcurementWorkflow
 
 
 async def login(client, role):
     r = await client.post(
         "/api/v1/auth/login",
         json={
-            "email": "purchasing@vinuni.edu.vn" if role == "procurement" else "manager@vinuni.edu.vn",
+            "email": "anhnm@dotcom.vn" if role == "procurement" else "quanghuy@dotcom.vn",
             "password": "Purchase123!" if role == "procurement" else "Manager123!",
         },
     )
@@ -142,7 +142,7 @@ async def test_manager_can_reject_submitted_recommendation_without_creating_a_po
 
 @pytest.mark.asyncio
 async def test_prepare_projects_legacy_confirmations_into_v1_analysis_state(client, integration):
-    """The v1 graph must receive confirmed quotes, not only legacy raw rows."""
+    """The agent graph must receive confirmed quotes, not only legacy raw rows."""
     service, prs, quotes, _, _ = integration
     pr_id, _, _ = await prepare(client)
 
@@ -173,7 +173,7 @@ async def test_needs_input_proposal_is_not_mislabelled_as_buyer_review(client, i
             del state, config, stream_mode
             yield {"decision_llm": {"decision_proposal": {"status": "needs_input", "rationale": "Thiếu TCO."}}}
 
-    monkeypatch.setattr("src.services.procurement.workflow.build_graph", lambda **_: NeedsInputGraph())
+    monkeypatch.setattr("src.application.procurement.workflow.build_graph", lambda **_: NeedsInputGraph())
 
     result = service.execute_analysis(start)
 
@@ -198,7 +198,7 @@ async def test_unmapped_unit_is_explained_without_a_fake_model_failure(client, i
                 }
             }
 
-    monkeypatch.setattr("src.services.procurement.workflow.build_graph", lambda **_: NormalizeOnlyGraph())
+    monkeypatch.setattr("src.application.procurement.workflow.build_graph", lambda **_: NormalizeOnlyGraph())
 
     result = service.execute_analysis(start)
 
@@ -292,8 +292,8 @@ async def test_stale_source_and_missing_analysis_cannot_approve(client, integrat
 async def test_agent_pdf_intake_requires_confirmation_and_survives_restart(client, integration, monkeypatch):
     import fitz
 
-    from src.services.quotation.intake import TextFirstOCR
-    from src.services.quotation.repository import QuotationRepository
+    from src.infrastructure.documents.pdf_extractor import PDFTextExtractor
+    from src.infrastructure.quotation.repository import QuotationRepository
 
     service, prs, quotes, pos, model = integration
     buyer, manager = await login(client, "procurement"), await login(client, "manager")
@@ -316,7 +316,7 @@ async def test_agent_pdf_intake_requires_confirmation_and_survives_restart(clien
 
         def extract_text(self, path):
             self.calls += 1
-            return TextFirstOCR().extract_text(path)
+            return PDFTextExtractor().extract_text(path)
 
     class Extraction:
         calls = 0
@@ -374,7 +374,7 @@ async def test_agent_pdf_intake_requires_confirmation_and_survives_restart(clien
     assert restarted_quotes.get(pending[0]["id"]).items[0].unit_price == 900
     assert "Vendor A" in restarted_quotes.get(pending[0]["id"]).source_ocr_text
     assert "source_ocr_text" not in pending[0]
-    from src.services.quotation.repository import get_quotation_repository
+    from src.infrastructure.quotation.repository import get_quotation_repository
 
     app.dependency_overrides[get_quotation_repository] = lambda: restarted_quotes
     for quote in pending:
@@ -430,7 +430,7 @@ async def test_agent_pdf_intake_requires_confirmation_and_survives_restart(clien
 
 @pytest.mark.asyncio
 async def test_restart_reconciles_approval_when_po_write_fails(client, integration, monkeypatch):
-    from src.services.procurement.workflow import ProcurementWorkflow
+    from src.application.procurement.workflow import ProcurementWorkflow
 
     service, prs, quotes, pos, model = integration
     pr_id, buyer, manager = await prepare(client)
@@ -452,10 +452,10 @@ async def test_restart_reconciles_approval_when_po_write_fails(client, integrati
         "recommendation_id": run["recommendation_id"],
         "recommendation_version": 1,
     }
-    from src.services.auth import get_session
+    from src.infrastructure.auth import get_session
 
     user = get_session(manager["Authorization"].removeprefix("Bearer ")).user
-    from src.models.evaluation import Feedback
+    from src.domain.analysis.evaluation import Feedback
 
     with pytest.raises(OSError):
         service.feedback(Feedback.model_validate(payload), user, prs, quotes, pos)
@@ -483,6 +483,49 @@ def test_reconcile_skips_orphaned_finalization_command(integration):
         )
 
     assert service.reconcile(prs, quotes, pos) == 0
+
+
+def test_reconcile_skips_pending_finalization_when_pr_was_deleted(integration):
+    """A deleted PR must not turn a recoverable stale command into startup failure."""
+    service, _, quotes, pos, _ = integration
+    recommendation_id = "deleted-pr-recommendation"
+    pr_id = "deleted-pr"
+    service.save(
+        {
+            "analysis_id": "deleted-pr-analysis",
+            "pr_id": pr_id,
+            "recommendation_id": recommendation_id,
+            "snapshot_revision": "old-snapshot",
+            "status": "pending_manager_approval",
+        }
+    )
+    command = {
+        "pr_id": pr_id,
+        "po": {
+            "id": "deleted-pr-po",
+            "code": "PO-DELETED-PR",
+            "pr_id": pr_id,
+            "pr_code": "PR-DELETED",
+            "quotation_id": "quote",
+            "supplier_name": "Supplier",
+            "items": [],
+            "total_amount": "1",
+            "approver_id": "manager",
+            "approver_name": "Manager",
+            "recommendation_id": recommendation_id,
+            "recommendation_version": 1,
+        },
+    }
+    with service.db() as db:
+        db.execute("INSERT INTO finalization VALUES (?,?)", (command["po"]["id"], json.dumps(command)))
+
+    class DeletedPRRepository:
+        @staticmethod
+        def get(_pr_id):
+            return None
+
+    assert service.reconcile(DeletedPRRepository(), quotes, pos) == 0
+    assert not pos.list()
 
 
 def test_po_amounts_derive_missing_legacy_confirmation_totals():

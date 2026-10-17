@@ -5,7 +5,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from src.models_v1.quotation.extraction import (
+from src.domain.agent.quotation.extraction import (
     ValidatedExtraction,
     ValidationSeverity,
 )
@@ -440,3 +440,51 @@ def test_tc08_multiple_drafts_and_empty_state(sample_raw_draft_dict: dict[str, A
     assert len(multi_result["validated_extractions"]) == 2
     assert multi_result["validated_extractions"][0].schema_valid is True
     assert multi_result["validated_extractions"][1].schema_valid is False
+
+
+# ==============================================================================
+# TC-09 — PyMuPDF Text Layer: Confidence là None/null không bị cảnh báo LOW_CONFIDENCE
+# ==============================================================================
+def test_tc09_pymupdf_null_confidence_does_not_trigger_low_confidence() -> None:
+    draft: dict[str, Any] = {
+        "supplier_name": {
+            "value": "Công ty Digital PDF",
+            "confidence": None,
+            "source": {"document_id": "d1", "page_number": 1, "block_id": "b1"},
+        },
+        "currency": {
+            "value": "VND",
+            "confidence": None,
+            "source": {"document_id": "d1", "page_number": 1, "block_id": "b2"},
+        },
+        "items": [
+            {
+                "source_item_id": "item-1",
+                "product_name": {
+                    "value": "Sản phẩm A",
+                    "confidence": None,
+                    "source": {"document_id": "d1", "page_number": 1, "block_id": "b3"},
+                },
+                "unit": {
+                    "value": "cái",
+                    "confidence": None,
+                    "source": {"document_id": "d1", "page_number": 1, "block_id": "b4"},
+                },
+                "quantity": {
+                    "value": "5",
+                    "confidence": None,
+                    "source": {"document_id": "d1", "page_number": 1, "block_id": "b5"},
+                },
+                "unit_price": {
+                    "value": "500000.00",
+                    "confidence": None,
+                    "source": {"document_id": "d1", "page_number": 1, "block_id": "b6"},
+                },
+            }
+        ],
+    }
+    result = validate_extraction({"raw_extractions": [draft]})
+    val: ValidatedExtraction = result["validated_extractions"][0]
+    assert val.schema_valid is True
+    low_conf_issues = [i for i in val.issues if i.code == "LOW_CONFIDENCE"]
+    assert low_conf_issues == []

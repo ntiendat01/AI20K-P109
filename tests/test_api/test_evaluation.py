@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from src.api.routes.evaluation import router
-from src.services.evaluation.engine import Evaluator
-from src.services.evaluation.store import EvaluationStore
-from src.services.evaluation.workflow import EvaluationWorkflow
+from src.application.evaluation.engine import Evaluator
+from src.infrastructure.evaluation.store import EvaluationStore
+from src.application.evaluation.workflow import EvaluationWorkflow
 from tests.fixtures.evaluation_cases import actor, adapter, context, proposal
 
 

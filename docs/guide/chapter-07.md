@@ -651,8 +651,8 @@ LangSmith là công cụ monitoring chuyên biệt cho ứng dụng LLM/LangChai
 Cấu hình LangSmith chỉ cần 3 environment variables:
 
 ```bash
-export LANGSMITH_API_KEY="lsv2_pt_xxxxx"
-export LANGSMITH_PROJECT="ai20k-agent"
+export LANGCHAIN_API_KEY="lsv2_pt_xxxxx"
+export LANGCHAIN_PROJECT="ai20k-agent"
 export LANGCHAIN_TRACING_V2="true"
 ```
 

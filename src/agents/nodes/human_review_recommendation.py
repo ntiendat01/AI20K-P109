@@ -5,7 +5,7 @@ from typing import Literal, assert_never
 from langgraph.types import interrupt
 
 from src.agents.state import ProcurementAgentState
-from src.models_v1.approval import BuyerAction, BuyerSubmitApprovalRequest
+from src.domain.agent.approval import BuyerAction, BuyerSubmitApprovalRequest
 
 
 class AnalysisRevisionMismatchError(ValueError):

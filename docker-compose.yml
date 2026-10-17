@@ -1,21 +1,100 @@
-services: 
-  backend:
+name: 'dotcom'
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.7-pg16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-procura}
+      POSTGRES_USER: ${POSTGRES_USER:-procura}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-procura}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-vector-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    image: frontend:${APP_TAG:-latest}
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    command: [ "redis-server", "--appendonly", "yes" ]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ocr:
+    image: ocr:${APP_TAG:-latest}
+    container_name: ocr
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ocr/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ocr-models:/opt/ocr-models
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    image: backend:${APP_TAG:-latest}
+    container_name: backend
+    build:
+      context: .
+      dockerfile: src/Dockerfile
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      OCR_SERVICE_BASE_URL: http://ocr:8080
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-procura}:${POSTGRES_PASSWORD:-procura}@postgres:5432/${POSTGRES_DB:-procura}
+      PERSISTENCE_BACKEND: postgresql
+      STORAGE_PROVIDER: filesystem
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ocr:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./data:/app/data
-      # Development: serve UI directly from the working tree. This makes every
-      # saved frontend change visible after refresh, without relying on a
-      # previously built image.
-      - ./frontend:/app/frontend:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
+
+volumes:
+  redis-data:
+  postgres-vector-data:
+  ocr-models:

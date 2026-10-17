@@ -3,13 +3,14 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Final
 
-from src.models_v1.analysis.comparison import ComparisonCell, SupplierComparisonMatrix
-from src.models_v1.analysis.normalization import NormalizedQuotationArtifact
-from src.models_v1.analysis.tco import TCOResult
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.analysis.comparison import ComparisonCell, SupplierComparisonMatrix
+from src.domain.agent.analysis.normalization import NormalizedQuotationArtifact
+from src.domain.agent.analysis.tco import TCOResult
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
+from src.infrastructure.repositories.system_settings import get_dynamic_settings
 
 CRITERIA: Final = ("total_tco", "lead_time_days", "warranty_months")
-DEVIATION_THRESHOLD: Final = Decimal("0.15")
+DEFAULT_DEVIATION_THRESHOLD: Final = Decimal("0.15")
 MISSING_DATA: Final = "Thiếu dữ liệu"
 INSUFFICIENT_DATA: Final = "Không đủ dữ liệu so sánh"
 
@@ -20,7 +21,13 @@ def compare_suppliers(
     tco_results: list[TCOResult],
     *,
     supplier_ids: list[str] | None = None,
+    deviation_threshold: Decimal | None = None,
 ) -> SupplierComparisonMatrix:
+    threshold = (
+        deviation_threshold
+        if deviation_threshold is not None
+        else Decimal(str(get_dynamic_settings().deviation_threshold))
+    )
     tco_by_revision = {result.quotation_revision_id: result for result in tco_results}
     supplier_values: dict[str, dict[str, Decimal | None]] = {}
 
@@ -44,6 +51,7 @@ def compare_suppliers(
                 value=values[criterion],
                 mean=means[criterion],
                 comparable_count=sum(candidate[criterion] is not None for candidate in supplier_values.values()),
+                deviation_threshold=threshold,
             )
             for criterion in CRITERIA
         }
@@ -53,7 +61,7 @@ def compare_suppliers(
         criteria=list(CRITERIA),
         matrix=matrix,
         means=means,
-        deviation_threshold=DEVIATION_THRESHOLD,
+        deviation_threshold=threshold,
     )
 
 
@@ -68,6 +76,7 @@ def _cell(
     value: Decimal | None,
     mean: Decimal | None,
     comparable_count: int,
+    deviation_threshold: Decimal = DEFAULT_DEVIATION_THRESHOLD,
 ) -> ComparisonCell:
     if value is None:
         return ComparisonCell(value=MISSING_DATA, note=MISSING_DATA)
@@ -78,7 +87,7 @@ def _cell(
     return ComparisonCell(
         value=_decimal_text(value),
         deviation_pct=deviation_pct,
-        highlight=abs(deviation_pct) > DEVIATION_THRESHOLD * Decimal(100),
+        highlight=abs(deviation_pct) > deviation_threshold * Decimal(100),
     )
 
 

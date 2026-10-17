@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-from src.models_v1.analysis.comparison import SupplierComparisonMatrix
-from src.models_v1.analysis.decision import DecisionProposal
-from src.models_v1.analysis.normalization import NormalizedQuotationArtifact
-from src.models_v1.analysis.risk import RiskFlag
-from src.models_v1.analysis.tco import TCOResult
-from src.models_v1.approval import BuyerSubmitApprovalRequest
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
-from src.models_v1.quotation.extraction import ValidatedExtraction
+from src.domain.agent.analysis.comparison import SupplierComparisonMatrix
+from src.domain.agent.analysis.decision import DecisionProposal
+from src.domain.agent.analysis.normalization import NormalizedQuotationArtifact
+from src.domain.agent.analysis.risk import RiskFlag
+from src.domain.agent.analysis.tco import TCOResult
+from src.domain.agent.approval import BuyerSubmitApprovalRequest
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.quotation.extraction import ValidatedExtraction
 
 
 class ProcurementAgentState(TypedDict, total=False):

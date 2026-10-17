@@ -4,10 +4,11 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 from src.agents.nodes.normalize import normalize
-from src.models.procurement_workflow import ProcurementAnalysis
-from src.models.purchase_request import PRItem, PRStatus, PurchaseRequest
-from src.models.quotation.confirmation import Quotation, QuotationItem, QuotationStatus
-from src.services.procurement.workflow import ProcurementWorkflow
+from src.domain.procurement.workflow import ProcurementAnalysis
+from src.domain.purchase_request import PRItem, PRMetadata, PRStatus, PurchaseRequest, UpdatePurchaseRequest
+from src.domain.procurement.invalidation import InvalidationLevel, assess_purchase_request_impact
+from src.domain.quotation.confirmation import Quotation, QuotationItem, QuotationStatus
+from src.application.procurement.workflow import ProcurementWorkflow
 
 
 def _purchase_request() -> PurchaseRequest:
@@ -69,6 +70,26 @@ def _quotation(index: int, unit_price: Decimal) -> Quotation:
         goods_total_including_tax=line_total,
         shipping_total_including_tax=Decimal("0.00"),
     )
+
+
+def test_descriptive_pr_metadata_updates_without_invalidating_analysis(tmp_path):
+    workflow = ProcurementWorkflow(tmp_path / "workflow.sqlite", object(), tenant_id="test")
+    original = _purchase_request().model_copy(
+        update={"metadata": PRMetadata(department="Phòng Hành chính", requested_by="Nguyễn Minh Anh")}
+    )
+    changed = original.model_copy(
+        update={"metadata": PRMetadata(department="Phòng IT", requested_by="Nguyễn Minh Anh", purpose="Bổ sung thiết bị")}
+    )
+    quotes = [_quotation(1, Decimal("15050000.00")), _quotation(2, Decimal("15180000.00"))]
+    proposed = UpdatePurchaseRequest.model_validate(
+        {key: value for key, value in changed.model_dump(mode="json").items() if key in UpdatePurchaseRequest.model_fields}
+    )
+
+    impact = assess_purchase_request_impact(original, proposed)
+
+    assert impact.level == InvalidationLevel.METADATA
+    assert {change.label for change in impact.changes} == {"Phòng ban", "Ghi chú / Mục đích"}
+    assert workflow.revision(original, quotes) == workflow.revision(changed, quotes)
 
 
 def _multi_line_quotation(index: int, prices: list[Decimal]) -> Quotation:

@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import assert_never
 
-from src.models_v1.analysis.normalization import (
+from src.domain.agent.analysis.normalization import (
     NormalizationStatus,
     NormalizedQuotationArtifact,
 )
-from src.models_v1.analysis.risk import RiskFlag, RiskSeverity
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.analysis.risk import RiskFlag, RiskSeverity
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
 
 
 def analyze_risks(

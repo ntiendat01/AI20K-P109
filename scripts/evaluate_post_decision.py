@@ -10,9 +10,9 @@ import tempfile
 from decimal import Decimal
 from pathlib import Path
 
-from src.services.evaluation.engine import Evaluator
-from src.services.evaluation.store import EvaluationStore
-from src.services.evaluation.workflow import EvaluationWorkflow
+from src.application.evaluation.engine import Evaluator
+from src.application.evaluation.workflow import EvaluationWorkflow
+from src.infrastructure.evaluation.store import EvaluationStore
 from tests.fixtures.evaluation_cases import adapter, chunks, context, proposal
 
 
@@ -42,7 +42,7 @@ def measure(iterations: int = 40) -> dict[str, object]:
                     source.facts[0].value = Decimal("13000")
                     source.facts[0].value_text = "13000"
                     source.text = "TCO: 13000 USD."
-                from src.services.evaluation.evidence import content_hash
+                from src.infrastructure.evaluation.evidence import content_hash
 
                 source.chunk_hash = content_hash(source.text)
                 a.collection.replace(source)
@@ -83,7 +83,7 @@ def measure(iterations: int = 40) -> dict[str, object]:
         repair_result = workflow.submit(invalid, context())
     return {
         "dataset": "anonymous hand-computable fixtures; six inputs, repeated trials are not independent examples",
-        "backend": "Chroma API-shaped offline fake; see test_evaluation_chroma.py for real database integration",
+        "backend": "Offline evidence fake; production retrieval uses PostgreSQL with pgvector",
         "retrieval_k": 8,
         "cache": False,
         "concurrency": 1,

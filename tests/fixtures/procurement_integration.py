@@ -41,11 +41,11 @@ def integration_service(path):
     import chromadb
     from chromadb.config import Settings as ChromaSettings
 
-    from src.services.evaluation.engine import Evaluator
-    from src.services.evaluation.evidence import ChromaEvidenceAdapter
-    from src.services.evaluation.store import EvaluationStore
-    from src.services.evaluation.workflow import EvaluationWorkflow
-    from src.services.procurement.workflow import LocalLexicalEmbeddings, ProcurementWorkflow
+    from src.application.evaluation.engine import Evaluator
+    from src.infrastructure.evaluation.evidence import ChromaEvidenceAdapter
+    from src.infrastructure.evaluation.store import EvaluationStore
+    from src.application.evaluation.workflow import EvaluationWorkflow
+    from src.application.procurement.workflow import LocalLexicalEmbeddings, ProcurementWorkflow
 
     client = chromadb.PersistentClient(path=str(path / "chroma"), settings=ChromaSettings(anonymized_telemetry=False))
     collection = client.get_or_create_collection("integration", embedding_function=LocalLexicalEmbeddings())

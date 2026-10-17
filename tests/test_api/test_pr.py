@@ -14,10 +14,10 @@ from src.api.routes import pr as pr_routes
 from src.api.routes.pr import case_store
 from src.core.config import get_settings
 from src.main import app
-from src.services.evaluation.engine import Evaluator
-from src.services.evaluation.evidence import ChromaEvidenceAdapter
-from src.services.evaluation.store import EvaluationStore
-from src.services.evaluation.workflow import EvaluationWorkflow
+from src.application.evaluation.engine import Evaluator
+from src.infrastructure.evaluation.evidence import ChromaEvidenceAdapter
+from src.infrastructure.evaluation.store import EvaluationStore
+from src.application.evaluation.workflow import EvaluationWorkflow
 from tests.fixtures.evaluation_cases import FakeChroma, actor, chunks, context, proposal
 
 

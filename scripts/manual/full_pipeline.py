@@ -18,10 +18,10 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 from langgraph.types import Command  # noqa: E402
 
-import src.services.llm as llm_service  # noqa: E402
+import src.infrastructure.llm as llm_service  # noqa: E402
 from src.agents.graph import agent  # noqa: E402
 from src.core.config import get_settings  # noqa: E402
-from src.services.quotation.ai_extraction import GroqAPIExtractionClient  # noqa: E402
+from src.infrastructure.quotation.ai_extraction import GroqAPIExtractionClient  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +170,7 @@ class TrackedGroqExtractionClient(GroqAPIExtractionClient):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {settings.groq_api_key}",
         }
-        from src.services.quotation.ai_extraction import _fit_context_window
+        from src.infrastructure.quotation.ai_extraction import _fit_context_window
 
         ocr_text_fitted = _fit_context_window(
             ocr_text, settings.extraction_prompt, document_path, max_input_tokens=4500
@@ -207,7 +207,7 @@ class TrackedGroqExtractionClient(GroqAPIExtractionClient):
             notes=f"Document: {document_path}",
         )
 
-        from src.services.quotation.ai_extraction import _parse_qwen_response
+        from src.infrastructure.quotation.ai_extraction import _parse_qwen_response
 
         return _parse_qwen_response(resp_json)
 

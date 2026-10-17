@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from src.models.evaluation import Feedback
+from src.domain.analysis.evaluation import Feedback
 from tests.fixtures.procurement_integration import ConfirmedDecisionModel
 from tests.test_api.test_procurement_integration import completed_analysis, prepare
 
@@ -74,8 +74,8 @@ def test_expired_running_run_is_recovered_when_read(integration):
     service, prs, quotes, _, _ = integration
     pr = prs.list()[0] if prs.list() else None
     if pr is None:
-        from src.models.schemas import PurchaseRequestCreate
-        from src.services.auth import DemoUser
+        from src.domain.procurement.contracts import PurchaseRequestCreate
+        from src.infrastructure.auth import DemoUser
 
         pr = prs.create(
             PurchaseRequestCreate(
@@ -158,7 +158,7 @@ async def test_retry_after_po_created_before_pr_update_is_idempotent_and_auditab
             "decision": "approve",
         }
     )
-    from src.services.auth import get_session
+    from src.infrastructure.auth import get_session
 
     manager_user = get_session(manager["Authorization"].removeprefix("Bearer ")).user
     original_approve = prs.approve

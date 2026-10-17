@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from src.models.fuzzy_match import BatchMatchResult, MatchStatus
-from src.services.fuzzy_match import (
+from src.domain.fuzzy_match import BatchMatchResult, MatchStatus
+from src.domain.matching import (
     PRItem,
     ProductMatchingService,
     QuoteItemInput,
@@ -291,7 +291,7 @@ class TestThresholds:
         assert result.best_match.status == MatchStatus.AUTO_MATCHED
 
     def test_score_boundaries_direct(self):
-        from src.services.fuzzy_match import _decide_status
+        from src.domain.matching import _decide_status
 
         assert _decide_status(1.00) == MatchStatus.AUTO_MATCHED
         assert _decide_status(0.90) == MatchStatus.AUTO_MATCHED

@@ -6,8 +6,8 @@ from langgraph.types import interrupt
 from pydantic import TypeAdapter
 
 from src.agents.state import ProcurementAgentState
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
-from src.models_v1.quotation.extraction import ExtractionDraftPayload
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.quotation.extraction import ExtractionDraftPayload
 
 CONFIRMATION_LIST_ADAPTER: Final = TypeAdapter(list[QuotationConfirmationRequest])
 
@@ -41,7 +41,7 @@ class UnknownSourceItemError(ValueError):
 
 
 def human_review_extraction(state: ProcurementAgentState) -> ProcurementAgentState:
-    """Pause for mandatory Buyer confirmation of every models_v1 extraction draft."""
+    """Pause for mandatory Buyer confirmation of every agent-contract extraction draft."""
     drafts = [ExtractionDraftPayload.model_validate(raw) for raw in state.get("raw_extractions", [])]
     response = interrupt(
         {

@@ -41,10 +41,11 @@ class Settings(BaseSettings):
     openai_reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"] = "none"
 
     # Database
-    database_url: str = "sqlite:///./data/app.db"
+    database_url: str = "postgresql://procura:procura@postgres:5432/procura"
+    persistence_backend: Literal["postgresql", "legacy"] = "postgresql"
+    redis_url: str = "redis://localhost:6379/0"
 
-    # Vector Store
-    chroma_persist_dir: str = "./data/chroma"
+    # Vector evidence uses the shared PostgreSQL database.
     evaluation_database_path: Path = Path("data/evaluation.sqlite")
     evidence_query_k: int = Field(default=8, ge=1)
     evidence_service_retries: int = Field(default=2, ge=0, le=5)
@@ -76,6 +77,10 @@ class Settings(BaseSettings):
 
     # Procurement document intake
     upload_dir: Path = Path("data/uploads")
+    storage_provider: Literal["filesystem", "s3"] = "filesystem"
+    s3_bucket: str = ""
+    s3_region: str = ""
+    s3_prefix: str = "uploads"
     procurement_workflow_path: Path = Path("data/procurement-workflow.sqlite")
     procurement_tenant_id: str = "procura-demo"
     # A process-local background task is deliberately bounded: a restart or a
@@ -83,9 +88,12 @@ class Settings(BaseSettings):
     analysis_running_timeout_seconds: float = Field(default=300.0, gt=0, le=3600)
     quotation_extraction_mode: Literal["parser", "agent"] = "parser"
 
-    # Hosted PaddleOCR
-    paddleocr_access_token: str = ""
-    paddleocr_base_url: str | None = None
+    # Isolated OCR service.  Core never loads OCR inference dependencies.
+    ocr_service_base_url: str = "http://localhost:8080"
+    ocr_service_token: str = Field(default="", repr=False)
+    ocr_service_timeout_seconds: float = Field(default=120.0, gt=0, le=900)
+    ocr_max_upload_bytes: int = Field(default=25 * 1024 * 1024, gt=0)
+    ocr_max_pages: int = Field(default=100, gt=0)
 
     # OpenAI-compatible Qwen API
     qwen_base_url: str = ""
@@ -114,17 +122,53 @@ class Settings(BaseSettings):
     groq_timeout_seconds: float = Field(default=300.0, gt=0)
     groq_max_tokens: int = Field(default=8192, gt=0)
 
-    extraction_prompt: str = (
-        "Extract every supplier quote line from the OCR result. Return JSON with an "
-        "items array. Each item must contain supplier, item_name, unit_price, quantity, "
-        "unit, currency as an ISO 4217 code (default to VND when the quote does not state it), "
-        "vat_rate as a decimal, vat_included, surcharges as an array of kind, description, "
-        "amount and currency, warranty_months, "
-        "lead_time_days, lead_time_min, lead_time_max, lead_time_unit, confidence_score, "
-        "field_confidence, page_number, and source_text. Use null for information not present; "
-        "never guess values other than the agreed VND currency default. "
-        "Consolidate lines across pages and do not duplicate items."
-    )
+    extraction_prompt: str = """
+You are an advanced data extraction agent. Extract supplier quotation line items from OCR or native PDF text into the required JSON structure.
+
+[TASK]
+Extract every supplier quote line from the provided OCR text inside the <ocr_result> tag. Do not duplicate the same physical source row due to page overlap, repeated OCR, or continuation. Lines in the OCR text may include line-level confidence tags. Use ONLY explicit [ocr_conf: ...] values from the input to populate
+'confidence_score' and 'field_confidence'.
+
+Never estimate, infer, adjust, or self-assess confidence.
+If multiple applicable [ocr_conf: ...] values contribute to one item,
+set confidence_score to the minimum of those values.
+
+Do not calculate an average.
+[OUTPUT FORMAT]
+Return ONLY a valid JSON object. Do NOT include any introductory or concluding text, explanations, or markdown code blocks (e.g., do not wrap in ```json). Your response must start with '{' and end with '}'.
+
+[DATA SCHEMA]
+The output must be a single JSON object containing a top-level array named "items". Each object inside "items" must strictly adhere to the following keys and data types:
+- "supplier" (String or null)
+- "item_name" (String or null)
+- "unit_price" (Number or null)
+- "quantity" (Number or null)
+- "unit" (String or null)
+- "currency" (String): 3-letter ISO 4217 code. CRITICAL RULE: If the quote does not state the currency, default to "VND".
+- "vat_rate" (Number or null): Represented as a decimal (e.g., 0.1 for 10%).
+- "vat_included" (Boolean or null)
+- "surcharges" (Array of Objects): Each object contains:
+    * "kind" (String or null)
+    * "description" (String or null)
+    * "amount" (Number or null)
+    * "currency" (String or null)
+- "warranty_months" (Integer or null)
+- "lead_time_days" (String or null): The delivery lead time as stated in the quote (e.g., "2-4 ngày", "7 ngày", "3 tuần"). Use null if not mentioned.
+- "confidence_score" (Decimal or null):
+  OCR-derived confidence between 0.0 and 1.0.
+  It MUST be null when no applicable [ocr_conf] exists.
+- "field_confidence" (Object or null):
+  Map field names to Decimal values between 0.0 and 1.0 or null.
+  It MUST be null when no applicable [ocr_conf] exists.
+- "payment_terms" (String or null): The payment terms as stated in the quote (e.g., "Thanh toán trong 30 ngày", "Net 30", "Đặt cọc 30%"). Use null if not mentioned.
+- "page_number" (Integer or null)
+- "source_text" (String or null): The exact raw snippet from the OCR text where this item was found.
+
+[STRICT CONSTRAINTS]
+1. Never guess or hallucinate business values. If a business field is not present in the quote, use null (except currency which defaults to "VND").
+2. Ensure data types are strictly matched (e.g., quantities and prices must be Numbers, not Strings).
+"""
+
     decision_prompt: str = (
         "Return exactly one DecisionProposal JSON matching the supplied schema. Use only the "
         "supplied TCO results, comparison matrix, risk flags and allowed supplier IDs. Preserve "

@@ -6,9 +6,9 @@ from src.agents.nodes.analysis_tools import (
     compare_suppliers_node,
 )
 from src.agents.nodes.extract_documents import extract_documents
+from src.agents.nodes.fuzzy_match import fuzzy_match
 from src.agents.nodes.human_review_extraction import human_review_extraction
 from src.agents.nodes.normalize import normalize
-from src.agents.nodes.fuzzy_match import fuzzy_match
 from src.agents.nodes.validate_extraction import validate_extraction
 
 try:

@@ -15,16 +15,16 @@ from src.agents.nodes.analysis_tools import (
 from src.agents.nodes.confidence_router import confidence_router
 from src.agents.nodes.decision_llm import DecisionModel, decision_llm, decision_proposal
 from src.agents.nodes.extract_documents import extract_documents
+from src.agents.nodes.fuzzy_match import fuzzy_match
 from src.agents.nodes.human_review_extraction import human_review_extraction
 from src.agents.nodes.human_review_recommendation import human_review_recommendation
 from src.agents.nodes.normalize import normalize
-from src.agents.nodes.fuzzy_match import fuzzy_match
 from src.agents.nodes.validate_extraction import validate_extraction
 from src.agents.state import ProcurementAgentState
-from src.models_v1.analysis.normalization import NormalizationStatus
+from src.domain.agent.analysis.normalization import NormalizationStatus
 
 if TYPE_CHECKING:
-    from src.services.evaluation.workflow import EvaluationWorkflow
+    from src.application.evaluation.workflow import EvaluationWorkflow
 
 
 class _LegacyEvaluationGraph:

@@ -4,8 +4,8 @@ import re
 from collections.abc import Mapping
 
 from src.agents.state import ProcurementAgentState
-from src.models.procurement import EvidenceItem as EvidenceItemModel
-from src.models.procurement import Recommendation as RecommendationModel
+from src.domain.procurement.pipeline import EvidenceItem as EvidenceItemModel
+from src.domain.procurement.pipeline import Recommendation as RecommendationModel
 
 FIELD_PATTERNS = {
     "lead_time": re.compile(r"\b(?:lead[ _-]?time|delivery|giao)\b", re.IGNORECASE),

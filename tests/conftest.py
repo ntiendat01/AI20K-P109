@@ -1,11 +1,17 @@
+import os
 from decimal import Decimal
 from unittest.mock import AsyncMock
+
+# Tests must never send traces or credentials to LangSmith.
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
+os.environ["LANGCHAIN_ENDPOINT"] = ""
+os.environ["LANGCHAIN_API_KEY"] = ""
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from src.models_v1.quotation.extraction import (
+from src.domain.agent.quotation.extraction import (
     ExtractedFieldValue,
     ExtractedItemField,
     ExtractionDraftPayload,
@@ -33,7 +39,7 @@ def mock_llm():
 
 @pytest.fixture
 def sample_field_source() -> FieldSource:
-    """Fixture providing a standard FieldSource for models_v1 tests."""
+    """Fixture providing a standard FieldSource for agent-contract tests."""
     return FieldSource(document_id="doc-1", page_number=1, block_id="blk-1")
 
 
@@ -61,7 +67,7 @@ def make_extracted_field():
 
 @pytest.fixture
 def sample_valid_draft_payload(make_extracted_field) -> ExtractionDraftPayload:
-    """Fixture providing a valid models_v1 ExtractionDraftPayload."""
+    """Fixture providing a valid agent-contract ExtractionDraftPayload."""
     return ExtractionDraftPayload(
         supplier_name=make_extracted_field("Công ty ABC", "0.95"),
         currency=make_extracted_field("VND", "0.99"),
@@ -93,9 +99,9 @@ def sample_raw_draft_dict(sample_valid_draft_payload) -> dict:
 def integration(tmp_path):
     from src.api.routes.procurement_workflow import get_procurement_workflow
     from src.main import app
-    from src.services.procurement.purchase_orders import PurchaseOrderRepository, get_po_repository
-    from src.services.procurement.purchase_requests import PurchaseRequestRepository, get_pr_repository
-    from src.services.quotation.repository import QuotationRepository, get_quotation_repository
+    from src.infrastructure.repositories.purchase_orders import PurchaseOrderRepository, get_po_repository
+    from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository, get_pr_repository
+    from src.infrastructure.quotation.repository import QuotationRepository, get_quotation_repository
     from tests.fixtures.procurement_integration import integration_service
 
     service = integration_service(tmp_path)
@@ -128,7 +134,5 @@ def disable_live_provider_configuration(monkeypatch):
         "gemini_api_key",
         "qwen_api_key",
         "qwen_base_url",
-        "paddleocr_access_token",
     ):
         monkeypatch.setattr(settings, field, "")
-    monkeypatch.setattr(settings, "paddleocr_base_url", None)

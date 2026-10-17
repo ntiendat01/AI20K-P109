@@ -1,0 +1,1 @@
+"""Isolated OCR service runtime."""

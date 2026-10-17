@@ -52,10 +52,10 @@ from src.agents.nodes import (  # noqa: E402
     validate_extraction,
 )
 from src.agents.state import ProcurementAgentState  # noqa: E402
-from src.services.quotation.ai_extraction import (  # noqa: E402
+from src.infrastructure.documents.pdf_extractor import PDFTextExtractor  # noqa: E402
+from src.infrastructure.quotation.ai_extraction import (  # noqa: E402
     GeminiAPIExtractionClient,
     GroqAPIExtractionClient,
-    PaddleOCRHostedClient,
     QwenAPIExtractionClient,
 )
 
@@ -211,8 +211,8 @@ def _snapshot(state_file: Path, node_name: str, state: ProcurementAgentState) ->
 
 
 def _extract_ocr(state: ProcurementAgentState) -> dict[str, object]:
-    """Run only PaddleOCR and retain its raw serialized output."""
-    client = PaddleOCRHostedClient()
+    """Run the shared text-first OCR pipeline and retain serialized output."""
+    client = PDFTextExtractor()
     results: list[dict[str, object]] = []
     for document in state.get("documents", []):
         if not Path(document).is_file():

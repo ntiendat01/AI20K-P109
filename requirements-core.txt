@@ -1,0 +1,19 @@
+# Runtime dependencies for the FastAPI, LangGraph, procurement, and PDF layers.
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.20
+pypdf>=5.0.0
+pdfplumber>=0.11.0
+
+# AI / LangChain
+langchain-openai>=0.3.0
+langgraph>=0.2.0
+langsmith>=0.1.0
+
+# Runtime integrations
+httpx>=0.28.0
+psycopg[binary]>=3.2,<4
+boto3>=1.35,<2

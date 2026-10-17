@@ -27,7 +27,7 @@ Trước khi đăng ký tài khoản, hãy hiểu bạn sẽ cần gì:
 | Vector Store | ChromaDB / Pinecone / Qdrant | Self-host / Cloud | Lưu trữ embedding để tìm kiếm ngữ nghĩa |
 | Frontend | Next.js / Streamlit | Vercel / Streamlit Cloud | Giao diện người dùng |
 | DevOps | Docker + GitHub Actions | GitHub | Đóng gói & tự động deploy |
-| Monitoring | Langfuse / LangSmith | Cloud / Self-host | Theo dõi hoạt động của AI Agent |
+| Monitoring | LangSmith | Cloud | Theo dõi hoạt động của AI Agent |
 
 > 💡 **MẸO:** Template dự án (`ai20k-agent-template`) đã được setup sẵn cho stack này. Bạn chỉ cần fork về và bắt đầu code!
 
@@ -213,20 +213,12 @@ Bạn cần cloud hosting để deploy ứng dụng lên internet, để ban gi�
 
 Monitoring giúp bạn biết AI Agent đang hoạt động ra sao, có lỗi gì, và chất lượng response thế nào. Đây cũng là tiêu chí đánh giá DevOps trong Demo Day.
 
-### Langfuse — KHUYÊN DÙNG (Open-source, unlimited)
-
-- **Cloud miễn phí:** 50,000 traces/tháng, 2 users, 30 ngày retention
-- **Self-hosted:** UNLIMITED traces, UNLIMITED users — MIT license
-- **Tương thích:** Hoạt động với mọi LLM framework (LangChain, LangGraph, OpenAI SDK...)
-- **Đăng ký:** Cloud: https://cloud.langfuse.com | Self-hosted: https://github.com/langfuse/langfuse
-
-> 💡 **MẸO:** Langfuse self-hosted là lựa chọn TỐT NHẤT — không giới hạn, chạy trong Docker cùng FastAPI. 10x nhiều traces hơn LangSmith trên cloud!
-
-### LangSmith — Chính thức từ LangChain
+### LangSmith — lựa chọn của dự án
 
 - **Gói miễn phí:** 5,000 traces/tháng, 1 user, 14 ngày retention
-- **Ưu điểm:** Tích hợp sâu với LangChain/LangGraph (dùng trong template)
+- **Ưu điểm:** Tích hợp sâu với LangChain/LangGraph (dùng trong dự án)
 - **Đăng ký:** https://smith.langchain.com
+- **Cấu hình:** dùng `LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY` và `LANGCHAIN_PROJECT` trong `.env`; dự án không còn kèm Langfuse hay Docker stack quan sát riêng.
 
 ![Giao diện LangSmith (smith.langchain.com)](book-media/free-accounts/langsmith.jpg)
 
@@ -316,7 +308,7 @@ Tên miền riêng **KHÔNG BẮT BUỘC** cho Demo Day — bạn hoàn toàn c�
 
 **Q: Tôi có cần thẻ tín dụng không?**
 
-A: Hầu hết **KHÔNG CẦN**. Mistral, Google Gemini, Groq, Together AI, Cohere, Supabase, Qdrant, Langfuse, GitHub, Docker Hub đều không yêu cầu thẻ tín dụng. Chỉ Render (cho một số tính năng) và Railway có thể yêu cầu.
+A: Hầu hết **KHÔNG CẦN**. Mistral, Google Gemini, Groq, Together AI, Cohere, Supabase, Qdrant, GitHub, Docker Hub đều không yêu cầu thẻ tín dụng. Chỉ Render (cho một số tính năng) và Railway có thể yêu cầu.
 
 **Q: Tôi nên dùng LLM nào?**
 
@@ -340,7 +332,7 @@ A: GitHub: Mỗi người 1 tài khoản → collaborate trên repo. Vercel/Rend
 
 **Q: Template dùng OpenAI, nhưng tôi muốn dùng Mistral/Gemini — được không?**
 
-A: ĐƯỢC! Template dùng LangChain — hỗ trợ nhiều provider. Chỉ cần thay đổi `get_llm()` trong `src/services/llm.py`. Ví dụ: `ChatMistralAI` thay vì `ChatOpenAI`. Xem hướng dẫn trong `docs/guide/chapter-04.md` của template.
+A: ĐƯỢC! Template dùng LangChain — hỗ trợ nhiều provider. Chỉ cần thay đổi `get_llm()` trong `src/infrastructure/llm.py`. Ví dụ: `ChatMistralAI` thay vì `ChatOpenAI`. Xem hướng dẫn trong `docs/guide/chapter-04.md` của template.
 
 **Q: Tôi có thể dùng ChatGPT Plus / Claude Pro subscription thay vì API không?**
 
@@ -348,4 +340,4 @@ A: KHÔNG. ChatGPT Plus / Claude Pro là subscription cho chat interface, KHÔNG
 
 ---
 
-> 🔑 **ĐIỂM CHÍNH:** Đăng ký tài khoản trong Tuần 1, ưu tiên các dịch vụ KHUYÊN DÙNG (Mistral, Gemini, Render, Vercel, Supabase, GitHub, Langfuse). Chúc các đội xây dựng thành công ứng dụng AI! — *VinUni AI20K — Tìm Kiếm Nhân Tài Thực Chiến A.I*
+> 🔑 **ĐIỂM CHÍNH:** Đăng ký tài khoản trong Tuần 1, ưu tiên các dịch vụ KHUYÊN DÙNG (Mistral, Gemini, Render, Vercel, Supabase, GitHub, LangSmith). Chúc các đội xây dựng thành công ứng dụng AI! — *VinUni AI20K — Tìm Kiếm Nhân Tài Thực Chiến A.I*

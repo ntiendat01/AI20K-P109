@@ -55,8 +55,7 @@ async def test_agent_status(client):
 
 
 @pytest.mark.asyncio
-async def test_development_ui_is_not_cached(client):
+async def test_backend_no_longer_serves_legacy_ui_assets(client):
     response = await client.get("/ui/styles.css")
 
-    assert response.status_code == 200
-    assert response.headers["cache-control"] == "no-store, max-age=0"
+    assert response.status_code == 404

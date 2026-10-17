@@ -3,8 +3,8 @@ from datetime import date, timedelta
 import pytest
 
 from src.api.routes.procurement_workflow import public_run
-from src.models.procurement_workflow import ProcurementAnalysis
-from src.models.schemas import PRStatus
+from src.domain.procurement.workflow import ProcurementAnalysis
+from src.domain.procurement.contracts import PRStatus
 
 
 def test_public_run_omits_internal_fields_from_legacy_analysis_snapshots():
@@ -24,6 +24,7 @@ def test_public_run_omits_internal_fields_from_legacy_analysis_snapshots():
         "pr_id": "pr-1",
         "status": "awaiting_buyer_review",
         "analysis_id": "analysis-1",
+        "manager_note": None,
     }
 
 
@@ -118,7 +119,7 @@ async def test_migrate_awaiting_review_run_is_idempotent_and_route_stays_readabl
     service, prs, _, _, _ = integration
     login = await client.post(
         "/api/v1/auth/login",
-        json={"email": "purchasing@vinuni.edu.vn", "password": "Purchase123!"},
+        json={"email": "anhnm@dotcom.vn", "password": "Purchase123!"},
     )
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
     created = await client.post(

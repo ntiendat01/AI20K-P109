@@ -1,8 +1,8 @@
-# Spec: Khớp code runtime với schema mới (models_v1)
+# Spec: Khớp code runtime với strict agent contracts
 
 Trạng thái: **DRAFT — chờ duyệt**. Nguồn: rà soát code ngày 2026-10-07.
-Phạm vi: sửa các chỗ code/dữ liệu/test còn lệch so với `src/models_v1` và pipeline mới, gây lỗi khi chạy sản phẩm.
-Ngoài phạm vi: đổi `src/models_v1/**`, đổi contract trong `specs/contracts/**`, đổi prompt, đổi công thức `calculate_tco`/`compare_suppliers` (trừ khi mục tương ứng được duyệt).
+Phạm vi: sửa các chỗ code/dữ liệu/test còn lệch so với `src/models/agent` và pipeline mới, gây lỗi khi chạy sản phẩm.
+Ngoài phạm vi: đổi `src/models/agent/**`, đổi contract trong `specs/contracts/**`, đổi prompt, đổi công thức `calculate_tco`/`compare_suppliers` (trừ khi mục tương ứng được duyệt).
 
 ## Quy ước
 - Mỗi mục = tối đa 1 commit, kèm test và lệnh kiểm chứng.
@@ -36,7 +36,7 @@ Ngoài phạm vi: đổi `src/models_v1/**`, đổi contract trong `specs/contra
 - **Hiện trạng:** `_project_v1_draft` (`src/services/quotation/intake.py`) lọc dòng qua `_review_item`: bỏ dòng có số lượng lẻ, thiếu đơn giá, hoặc đơn giá quá 2 chữ số thập phân (vì `QuotationItem` cũ ép `quantity: int`). `agent_extractions` (`lines`) vẫn giữ đủ dòng. `resume_confirmation` đòi `len(payload.items) == len(agent_extractions)` nên Buyer bị lỗi "Số dòng xác nhận cần khớp…".
 - **Yêu cầu:** số dòng hiển thị cho Buyer và số dòng lưu trong `agent_extractions` phải luôn tương ứng 1-1, hoặc việc ghép phải dựa trên `source_item_id` thay vì độ dài danh sách.
   - Dòng không chuyển được sang `QuotationItem` cũ không bị bỏ im lặng: hoặc giữ lại ở dạng nháp để Buyer sửa (số lượng lẻ làm tròn không được tự ý), hoặc đưa vào `warnings` kèm `source_item_id`, và `agent_extractions` chỉ giữ các dòng tương ứng với dòng hiển thị.
-  - Không đổi `src/models_v1` hay model `QuotationItem` cũ trong mục này. Nếu cần hỗ trợ số lượng lẻ thật sự thì tách thành quyết định riêng (xem C2).
+  - Không đổi `src/models/agent` hay model `QuotationItem` cũ trong mục này. Nếu cần hỗ trợ số lượng lẻ thật sự thì tách thành quyết định riêng (xem C2).
 - **File:** `src/services/quotation/intake.py`, có thể `src/services/quotation/repository.py` (`apply_agent_extraction`, `confirm`).
 - **Test (thêm vào `tests/test_api/test_quotations.py`):** draft có 3 dòng, trong đó 1 dòng số lượng `2.5` và 1 dòng thiếu đơn giá → (a) `extract_for_quotation` trả `items` và `agent_extractions` khớp nhau; (b) confirm với đúng các dòng hiển thị thành công; (c) có warning nêu rõ dòng bị loại.
 - **Kiểm chứng:** `pytest tests/test_api/test_quotations.py tests/test_api/test_extraction.py -q`.
@@ -78,7 +78,7 @@ Ngoài phạm vi: đổi `src/models_v1/**`, đổi contract trong `specs/contra
 - Sau khi chọn, viết test: tổng PO == TCO được dùng để xếp hạng (P2) hoặc PO không cộng ship khi `null` (P1).
 
 ### C2. Số lượng lẻ
-- `QuotationItem` cũ chỉ nhận `int`; `models_v1` nhận `Decimal > 0`. Chọn: (a) giữ `int`, xử lý ở A3; (b) đổi `QuotationItem` cũ sang `Decimal` (đổi schema lưu `data/quotations.json` và PO → **CẦN DUYỆT**, kèm kế hoạch migrate).
+- `QuotationItem` cũ chỉ nhận `int`; agent contract nhận `Decimal > 0`. Chọn: (a) giữ `int`, xử lý ở A3; (b) đổi `QuotationItem` cũ sang `Decimal` (đổi schema lưu `data/quotations.json` và PO → **CẦN DUYỆT**, kèm kế hoạch migrate).
 
 ### C3. VAT khi giá đã gồm VAT
 - **Hiện trạng:** `total_vat = 0` và `vat_included` bị gán cứng `False` ở `_public_tco_item`, nên cột VAT trên UI sai với báo giá đã gồm VAT.

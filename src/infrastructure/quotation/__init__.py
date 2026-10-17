@@ -1,0 +1,1 @@
+"""Quotation-specific external adapters."""

@@ -4,7 +4,7 @@ from typing import Literal
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from src.services.auth import DemoUser, get_session
+from src.infrastructure.auth import DemoUser, get_session
 
 bearer_scheme = HTTPBearer(auto_error=False)
 logger = logging.getLogger(__name__)

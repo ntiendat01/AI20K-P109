@@ -19,17 +19,17 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.application.procurement.workflow import ProcurementWorkflow
 from src.core.config import get_settings
-from src.services.evaluation.store import EvaluationStore
-from src.services.procurement.purchase_orders import get_po_repository
-from src.services.procurement.purchase_requests import get_pr_repository
-from src.services.procurement.workflow import ProcurementWorkflow
+from src.infrastructure.evaluation.store import EvaluationStore
+from src.infrastructure.repositories.purchase_orders import get_po_repository
+from src.infrastructure.repositories.purchase_requests import get_pr_repository
 
 
 def main() -> int:
     settings = get_settings()
     # ``audit_consistency`` needs only the durable evaluation store. Avoid
-    # initializing Chroma, providers or reconciliation, all of which would be
+    # initializing evidence storage, providers or reconciliation, which would be
     # unrelated to a reporting-only command.
     evaluation = SimpleNamespace(store=EvaluationStore(settings.evaluation_database_path))
     workflow = ProcurementWorkflow(

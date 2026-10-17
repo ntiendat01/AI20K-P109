@@ -2,15 +2,12 @@ import logging
 import re
 import time
 from contextlib import asynccontextmanager
-from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
 
 from src.api.routes import router
 from src.api.routes.evaluation import router as evaluation_router
@@ -19,10 +16,10 @@ from src.api.routes.procurement_workflow import initialize_procurement
 from src.api.routes.procurement_workflow import router as procurement_router
 from src.core.config import get_settings
 from src.core.logging import bind_request_id, configure_logging, reset_request_id
-from src.services.auth import get_session
-from src.services.procurement.purchase_orders import get_po_repository
-from src.services.procurement.purchase_requests import get_pr_repository
-from src.services.quotation.repository import get_quotation_repository
+from src.infrastructure.auth import get_session
+from src.infrastructure.quotation.repository import get_quotation_repository
+from src.infrastructure.repositories.purchase_orders import get_po_repository
+from src.infrastructure.repositories.purchase_requests import get_pr_repository
 
 settings = get_settings()
 configure_logging(settings.log_level)
@@ -57,9 +54,6 @@ app.include_router(router, prefix="/api/v1")
 app.include_router(pr_router, prefix="/api")
 app.include_router(evaluation_router, prefix="/api")
 app.include_router(procurement_router, prefix="/api/v1")
-
-frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
-app.mount("/ui", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
 
 @app.exception_handler(RequestValidationError)
@@ -108,15 +102,6 @@ async def authenticated_evaluation_actor(request, call_next):
 
 
 @app.middleware("http")
-async def disable_development_ui_cache(request, call_next):
-    """Ensure a browser never reuses an old CSS/JS file during local UI work."""
-    response = await call_next(request)
-    if settings.app_env == "development" and request.url.path.startswith("/ui/"):
-        response.headers["Cache-Control"] = "no-store, max-age=0"
-    return response
-
-
-@app.middleware("http")
 async def log_http_request(request, call_next):
     """Log request outcomes without recording query strings, headers, or bodies."""
     supplied_request_id = request.headers.get("X-Request-ID", "")
@@ -156,9 +141,14 @@ async def log_http_request(request, call_next):
 
 @app.get("/", include_in_schema=False)
 async def frontend():
-    return RedirectResponse(url="/ui/")
+    return {"service": "dotcom-backend", "api": "/api/v1", "docs": "/docs"}
 
 
 @app.get("/health")
 async def health():
+    return {"status": "ok", "env": settings.app_env}
+
+
+@app.get("/api/health", include_in_schema=False)
+async def public_api_health():
     return {"status": "ok", "env": settings.app_env}

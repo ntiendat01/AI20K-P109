@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.models.schemas import PurchaseOrder, PurchaseOrderItem
+from src.domain.procurement.contracts import PurchaseOrder, PurchaseOrderItem
 from tests.test_api.test_procurement_integration import prepare
 
 

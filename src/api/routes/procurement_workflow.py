@@ -3,28 +3,27 @@
 import asyncio
 import hashlib
 import logging
-from pathlib import Path
 from typing import get_args
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from chromadb.errors import ChromaError
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+import psycopg
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from src.api.dependencies import require_role
 from src.api.routes.evaluation import configure_evaluation
+from src.application.procurement.workflow import ProcurementWorkflow
 from src.core.config import get_settings
-from src.models.evaluation import Feedback
-from src.models.procurement_workflow import ProcurementAnalysis, ProcurementFeedbackResult, WorkflowStatus
-from src.services.evaluation.store import ReviewConflictError, ReviewForbiddenError
-from src.services.procurement.purchase_orders import get_po_repository
-from src.services.procurement.purchase_requests import get_pr_repository
-from src.services.procurement.workflow import LocalLexicalEmbeddings, ProcurementWorkflow
-from src.services.quotation.repository import get_quotation_repository
+from src.domain.analysis.evaluation import Feedback
+from src.domain.procurement.workflow import ProcurementAnalysis, ProcurementFeedbackResult, WorkflowStatus
+from src.infrastructure.evaluation.evidence import PostgresEvidenceAdapter
+from src.infrastructure.evaluation.embedding import LocalLexicalEmbeddings
+from src.infrastructure.evaluation.store import ReviewConflictError, ReviewForbiddenError
+from src.infrastructure.quotation.repository import get_quotation_repository
+from src.infrastructure.repositories.purchase_orders import get_po_repository
+from src.infrastructure.repositories.purchase_requests import get_pr_repository
 
 router = APIRouter(tags=["procurement-workflow"])
 logger = logging.getLogger(__name__)
@@ -37,26 +36,25 @@ class BuyerRecommendationSubmission(BaseModel):
 def initialize_procurement(app) -> ProcurementWorkflow:
     settings = get_settings()
     try:
-        client = chromadb.PersistentClient(
-            path=str(Path(settings.chroma_persist_dir)), settings=ChromaSettings(anonymized_telemetry=False)
+        evidence = PostgresEvidenceAdapter(
+            settings.database_url,
+            LocalLexicalEmbeddings(),
+            k=settings.evidence_query_k,
         )
-        collection = client.get_or_create_collection(
-            "procurement-evidence-v1", embedding_function=LocalLexicalEmbeddings()
-        )
-    except (ChromaError, OSError):
+    except (psycopg.Error, OSError):
         logger.exception(
             "Vector database initialization failed",
-            extra={"event": "vector_database_connection_failed", "storage_backend": "chromadb"},
+            extra={"event": "vector_database_connection_failed", "storage_backend": "postgresql"},
         )
         raise
     logger.info(
         "Vector database initialized",
-        extra={"event": "vector_database_initialized", "storage_backend": "chromadb"},
+        extra={"event": "vector_database_initialized", "storage_backend": "postgresql"},
     )
     # Context is resolved from persisted application snapshots, never from LLM/request policy.
     workflow = configure_evaluation(
         app,
-        collection,
+        evidence,
         lambda case, actor: app.state.procurement_workflow.context(case, actor),
     )
     service = ProcurementWorkflow(
@@ -67,7 +65,7 @@ def initialize_procurement(app) -> ProcurementWorkflow:
     )
     service.migrate_legacy_runs(get_pr_repository())
     app.state.procurement_workflow = service
-    app.state.chroma_client = client
+    app.state.evidence_adapter = evidence
     return service
 
 
@@ -124,6 +122,27 @@ async def analyze(
     return _analysis_response(start.run, status.HTTP_202_ACCEPTED)
 
 
+class CancelAnalysisRequest(BaseModel):
+    analysis_id: str = Field(min_length=1, max_length=64)
+
+
+@router.post("/prs/{pr_id}/analysis/cancel", response_model=ProcurementAnalysis)
+def cancel_analysis(
+    pr_id: str,
+    payload: CancelAnalysisRequest,
+    user=Depends(require_role("procurement")),
+    prs=Depends(get_pr_repository),
+    service=Depends(get_procurement_workflow),
+):
+    del user
+    require_pr(pr_id, prs)
+    try:
+        run = service.cancel_analysis(pr_id, payload.analysis_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return public_run(run)
+
+
 def public_run(run):
     """Expose only the current public analysis contract.
 
@@ -136,7 +155,7 @@ def public_run(run):
     if payload.get("status") not in get_args(WorkflowStatus):
         payload["status"] = "stale"
         payload["message"] = "Đề xuất cũ chưa được kiểm chứng. Hãy phân tích lại trước khi gửi duyệt."
-    # The graph produces strict models_v1 artifacts while this browser API still
+    # The graph produces strict agent artifacts while this browser API still
     # exposes the established public procurement contract.  Project at this
     # boundary so durable v1 fields (revision IDs, currency and breakdowns)
     # never leak into — or break validation of — the legacy response model.
@@ -288,7 +307,7 @@ def review_source(
     prs=Depends(get_pr_repository),
     quotes=Depends(get_quotation_repository),
     service=Depends(get_procurement_workflow),
-) -> FileResponse:
+) -> Response:
     try:
         run = service.by_recommendation(recommendation_id)
         if run["status"] not in {"awaiting_buyer_review", "pending_manager_approval", "approved"}:
@@ -298,12 +317,16 @@ def review_source(
         if quotation_id not in {q["id"] for q in run["quotations"]}:
             raise HTTPException(404, "Báo giá không thuộc snapshot đề xuất này.")
         quote = quotes.get(quotation_id)
-        if quote is None or quote.pr_id != run["pr_id"] or not Path(quote.source_path).is_file():
+        if quote is None or quote.pr_id != run["pr_id"] or not quotes.source_exists(quote):
             raise HTTPException(404, "Không tìm thấy file nguồn.")
         expected = run["context"]["source_scope"]["document_hashes"][quotation_id]
-        if hashlib.sha256(Path(quote.source_path).read_bytes()).hexdigest() != expected:
+        if hashlib.sha256(quotes.read_source(quote)).hexdigest() != expected:
             raise ReviewConflictError("File nguồn không còn khớp snapshot đã kiểm chứng.")
-        return FileResponse(quote.source_path, media_type=quote.source_content_type, filename=quote.source_filename)
+        return Response(
+            content=quotes.read_source(quote),
+            media_type=quote.source_content_type,
+            headers={"Content-Disposition": f'attachment; filename="{quote.source_filename}"'},
+        )
     except ReviewConflictError as exc:
         raise HTTPException(409, str(exc)) from exc
 

@@ -3,13 +3,13 @@ from __future__ import annotations
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Final
 
-from src.models_v1.analysis.normalization import NormalizedQuotationArtifact
-from src.models_v1.analysis.tco import (
+from src.domain.agent.analysis.normalization import NormalizedQuotationArtifact
+from src.domain.agent.analysis.tco import (
     TCOBreakdownItem,
     TCOCalculationStatus,
     TCOResult,
 )
-from src.models_v1.quotation.confirmation import QuotationConfirmationRequest
+from src.domain.agent.quotation.confirmation import QuotationConfirmationRequest
 
 MONEY_QUANTUM: Final = Decimal("0.01")
 ZERO_MONEY: Final = Decimal("0.00")

@@ -15,7 +15,7 @@ flowchart TD
     %% Title / Main Flow
     orchestrator["Procurement Agent<br><b>Orchestrator</b>"]
     phase1["1. EXTRACTION"]
-    extractor["Document Extractor<br><b>PP-OCRv5 + Qwen3-8B</b>"]
+    extractor["Document Extractor<br><b>OCR service (PaddleOCR) + Qwen3-8B</b>"]
     validation["Validation Tool"]
     confidence{"Có trường < 80% ?"}
     human_extract["Human Review<br><small>Buyer đối soát + sửa dữ liệu<br>Trường < 80% bắt buộc confirm</small>"]
@@ -66,6 +66,25 @@ flowchart TD
     feedback --> qwen
 ```
 
+## Code Layout
+
+Mã nguồn được chia theo dependency direction, không theo framework:
+
+```text
+api  -> application -> domain
+          |      \
+        agents -> infrastructure
+```
+
+- `src/api/`: FastAPI transport; nhận/trả HTTP, dependency và authorization.
+- `src/application/`: use case điều phối procurement, quotation và evaluation.
+- `src/domain/`: contract Pydantic và quy tắc nghiệp vụ thuần.
+- `src/agents/`: LangGraph orchestration; dùng contract domain và adapter kỹ thuật.
+- `src/infrastructure/`: OCR/LLM/PDF, repository và persistence adapter.
+- `src/core/`: configuration, logging và cross-cutting technical primitive.
+
+Các contract của luồng procurement nằm trong `src/domain/procurement/`, evaluation trong `src/domain/analysis/evaluation.py` và request/response riêng của HTTP trong `src/api/contracts/`. OCR service dùng chung `src/infrastructure/ocr/contracts.py` với backend.
+
 ## Components
 
 <!-- ### 1. Frontend (React/Next.js)
@@ -85,8 +104,8 @@ flowchart TD
 - **Pattern:** Orchestrator → Tool Calling → Human-in-the-Loop (HITL) phân tách thành 2 Phase (Extraction & Analysis/Recommendation).
 - **Core Models:**
   - **LLM:** Qwen3-8B (trích xuất dữ liệu có cấu trúc JSON, phân tích tổng hợp, lập luận và đề xuất).
-  - **OCR Engine:** PP-OCRv5 (quét text, xử lý layout bảng biểu/đa cột từ các file PDF báo giá).
-- **State Schema (`src/agent/state.py`):**
+  - **OCR Engine:** PaddleOCR trong OCR service riêng (quét text, xử lý layout bảng biểu/đa cột từ các file PDF báo giá).
+- **State Schema (`src/agents/state.py`):**
   - Định nghĩa `ProcurementAgentState` (`TypedDict`, `total=False`):
     - `case_id` & `pr_data`: Mã PR, tiêu chí bắt buộc (số lượng, hạn giao hàng yêu cầu, ngân sách).
     - `documents`: Danh sách tài liệu báo giá PDF từ các nhà cung cấp.
@@ -98,9 +117,9 @@ flowchart TD
     - `risk_flags`: Danh sách cảnh báo rủi ro phát hiện từ báo giá.
     - `recommendation`: Đề xuất nhà cung cấp tối ưu kèm giải trình logic và trích dẫn bằng chứng.
     - `human_feedback`: Ý kiến phản hồi và chỉ đạo điều chỉnh từ Buyer.
-- **Pipeline Nodes (`src/agent/nodes.py`):**
+- **Pipeline Nodes (`src/agents/nodes/`):**
   - **Phase 1: Ingestion & Extraction**
-    - `extract_documents`: Sử dụng PP-OCRv5 đọc PDF và Qwen3-8B trích xuất các trường dữ liệu theo schema.
+    - `extract_documents`: Ưu tiên text layer theo từng trang, gọi OCR service cho trang thiếu text rồi dùng Qwen3-8B trích xuất các trường dữ liệu theo schema.
     - `validate_extraction`: Kiểm tra tính toàn vẹn dữ liệu, gán `confidence_score` cho từng trường, và gắn cờ `needs_confirmation = True` cho trường < 80%.
     - `human_review_extraction` *(HITL)*: Điểm dừng `interrupt()`. Nếu có trường < 80% → **bắt buộc** Buyer confirm từng trường được gắn cờ. Nếu tất cả >= 80% → Buyer **tùy chọn** review/sửa hoặc skip. Chặn "Chốt dữ liệu" khi còn trường chưa confirm.
   - **Phase 2: Analysis & Recommendation**
@@ -110,14 +129,14 @@ flowchart TD
     - `generate_evidence`: Tổng hợp bảng so sánh và tạo lập báo cáo giải trình đề xuất kèm trích dẫn số liệu.
     - `human_review_recommendation` *(HITL)*: Điểm dừng `interrupt()` cho Buyer xem xét đề xuất cuối cùng.
     - `process_feedback`: Tiếp nhận phản hồi điều chỉnh từ Buyer để tái phân tích hoặc hoàn tất quy trình.
-- **Deterministic Tools (`src/agent/tools.py`):**
+- **Deterministic Tools (`src/agents/tools/`):**
   - `validate_extraction`: Xác thực schema và tính đầy đủ của dữ liệu trích xuất từ báo giá.
   - `normalize_data`: Quy chuẩn đơn vị tính và tiền tệ; gắn cờ cảnh báo đối với đơn vị lạ để can thiệp thủ công.
   - `calculate_tco`: Tính tổng chi phí sở hữu xác định tuyệt đối bằng code logic (không để LLM tính toán số học):
     $$\text{TCO} = (\text{unit\_price} \times \text{quantity} + \text{surcharges}) \times (1 + \text{VAT\_rate})$$
   - `compare_suppliers`: Lập ma trận so sánh chi tiết giữa các nhà cung cấp theo từng tiêu chí. Highlight ô có chênh lệch vượt ngưỡng cấu hình (`deviation_threshold`, mặc định 15%) so với trung bình.
   - `analyze_risks`: Rà soát và gắn cờ rủi ro (thiếu lead time, giao trễ hơn hạn PR, chi phí ẩn).
-- **Conditional Routing & Guardrails (`src/agent/graph.py`):**
+- **Conditional Routing & Guardrails (`src/agents/graph.py`):**
   - `confidence_router`: Kiểm tra field-level — gắn `review_mode` trong state: nếu **bất kỳ trường nào** có `confidence < 80%` → `mandatory` (buyer bắt buộc confirm các trường đó). Nếu tất cả >= 80% → `optional` (buyer tùy chọn review/sửa hoặc chốt ngay). Cả hai mode đều đi qua `human_review_extraction`.
   - `evaluate_sufficiency`: Kiểm tra tối thiểu 2 báo giá hợp lệ trước khi chuyển sang pha so sánh.
   - `buyer_decision_router`: Phê duyệt $\rightarrow$ kết thúc (`END`), Yêu cầu chỉnh sửa $\rightarrow$ `process_feedback`.

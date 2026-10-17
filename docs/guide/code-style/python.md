@@ -50,7 +50,7 @@ from langchain_core.tools import tool
 
 # 3. Local
 from src.core.config import get_settings
-from src.models.schemas import ChatRequest
+from src.api.contracts.common import ChatRequest
 ```
 
 ### 5. Error Handling

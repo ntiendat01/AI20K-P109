@@ -9,11 +9,11 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from src.models_v1.quotation.confirmation import (
+from src.domain.agent.quotation.confirmation import (
     ConfirmedItemPayload,
     QuotationConfirmationRequest,
 )
-from src.models_v1.quotation.extraction import (
+from src.domain.agent.quotation.extraction import (
     ValidatedExtraction,
     ValidationIssue,
     ValidationSeverity,

@@ -1,4 +1,4 @@
-"""Anonymous live-provider E2E smoke; all business/evidence data stays in a temporary directory.
+"""Anonymous live-provider E2E smoke; requires PostgreSQL and the OCR service.
 
 Run: python -m scripts.smoke_procurement_live --provider openai --output PATH
 This deliberately calls the configured provider; never import or execute it from pytest.
@@ -17,8 +17,9 @@ import pymupdf as fitz
 from httpx import ASGITransport, AsyncClient
 
 from src.core.config import get_settings
+from src.infrastructure.quotation import repository as quotations
+from src.infrastructure.repositories import purchase_orders, purchase_requests
 from src.main import app
-from src.services import purchase_orders, purchase_requests, quotations
 
 logger = logging.getLogger(__name__)
 result_logger = logging.getLogger(f"{__name__}.result")
@@ -58,7 +59,6 @@ async def run(provider: str) -> dict:
     trace = []
     with tempfile.TemporaryDirectory(prefix="procura-live-") as directory:
         path = Path(directory)
-        settings.chroma_persist_dir = str(path / "chroma")
         settings.procurement_workflow_path = path / "workflow.sqlite"
         settings.evaluation_database_path = path / "evaluation.sqlite"
         purchase_requests.repository = purchase_requests.PurchaseRequestRepository(path / "prs.json")
@@ -80,7 +80,7 @@ async def run(provider: str) -> dict:
                         "/api/v1/auth/login",
                         200,
                         json={
-                            "email": "purchasing@vinuni.edu.vn" if role == "buyer" else "manager@vinuni.edu.vn",
+                            "email": "anhnm@dotcom.vn" if role == "buyer" else "quanghuy@dotcom.vn",
                             "password": "Purchase123!" if role == "buyer" else "Manager123!",
                         },
                     )

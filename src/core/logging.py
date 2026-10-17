@@ -76,5 +76,5 @@ def configure_logging(level: str) -> None:
     )
 
     # These libraries are useful at warning level but too noisy for request debugging.
-    for logger_name in ("httpcore", "httpx", "chromadb"):
+    for logger_name in ("httpcore", "httpx"):
         logging.getLogger(logger_name).setLevel(logging.WARNING)

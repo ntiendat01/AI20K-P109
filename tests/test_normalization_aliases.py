@@ -1,6 +1,6 @@
 from src.agents.nodes.normalize import normalize
-from src.models_v1.analysis.normalization import NormalizationStatus
-from src.models_v1.quotation.confirmation import (
+from src.domain.agent.analysis.normalization import NormalizationStatus
+from src.domain.agent.quotation.confirmation import (
     ConfirmedItemPayload,
     QuotationConfirmationRequest,
 )

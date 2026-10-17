@@ -7,31 +7,37 @@ from collections.abc import Callable
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import JsonValue
 
-from src.models.evaluation import Actor, Contract, EvaluationResult, Feedback, FeedbackReceipt, RuntimeEvaluationContext
-from src.services.evaluation.evidence import ChromaCollection
-from src.services.evaluation.store import ReviewConflictError, ReviewForbiddenError
-from src.services.evaluation.workflow import EvaluationWorkflow, RepairModel
+from src.application.evaluation.workflow import EvaluationWorkflow, RepairModel
+from src.domain.analysis.evaluation import (
+    Actor,
+    Contract,
+    EvaluationResult,
+    Feedback,
+    FeedbackReceipt,
+    RuntimeEvaluationContext,
+)
+from src.infrastructure.evaluation.evidence import PostgresEvidenceAdapter
+from src.infrastructure.evaluation.store import ReviewConflictError, ReviewForbiddenError
 
 router = APIRouter(prefix="/evaluations", tags=["evaluation"])
 
 
 def configure_evaluation(
     app: FastAPI,
-    collection: ChromaCollection,
+    evidence: PostgresEvidenceAdapter,
     context_provider: Callable[[str, Actor], RuntimeEvaluationContext],
     *,
     repair_model: RepairModel | None = None,
 ) -> EvaluationWorkflow:
     """Install trusted application dependencies at startup; never infer policy from LLM state."""
+    from src.application.evaluation.engine import Evaluator
     from src.core.config import get_settings
-    from src.services.evaluation.engine import Evaluator
-    from src.services.evaluation.evidence import ChromaEvidenceAdapter
-    from src.services.evaluation.store import EvaluationStore
+    from src.infrastructure.evaluation.store import EvaluationStore
 
     settings = get_settings()
     workflow = EvaluationWorkflow(
         Evaluator(
-            ChromaEvidenceAdapter(collection, k=settings.evidence_query_k),
+            evidence,
             service_retries=settings.evidence_service_retries,
             backoff_seconds=settings.evidence_retry_backoff_seconds,
         ),
@@ -88,8 +94,8 @@ def review_payload(recommendation_id: str, request: Request) -> dict[str, object
     actor = _actor(request)
     service = getattr(request.app.state, "procurement_workflow", None)
     if service is not None:
-        from src.services.procurement.purchase_requests import get_pr_repository
-        from src.services.quotation.repository import get_quotation_repository
+        from src.infrastructure.quotation.repository import get_quotation_repository
+        from src.infrastructure.repositories.purchase_requests import get_pr_repository
 
         try:
             service.ensure_current(
@@ -113,10 +119,10 @@ def review_feedback(recommendation_id: str, feedback: Feedback, request: Request
     try:
         service = getattr(request.app.state, "procurement_workflow", None)
         if service is not None:
-            from src.services.auth import get_session
-            from src.services.procurement.purchase_orders import get_po_repository
-            from src.services.procurement.purchase_requests import get_pr_repository
-            from src.services.quotation.repository import get_quotation_repository
+            from src.infrastructure.auth import get_session
+            from src.infrastructure.quotation.repository import get_quotation_repository
+            from src.infrastructure.repositories.purchase_orders import get_po_repository
+            from src.infrastructure.repositories.purchase_requests import get_pr_repository
 
             user = get_session(request.headers["Authorization"].removeprefix("Bearer ")).user
             result = service.feedback(

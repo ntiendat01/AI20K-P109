@@ -12,34 +12,34 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from src.models_v1.analysis.comparison import (
+from src.domain.agent.analysis.comparison import (
     SupplierComparisonMatrix,
 )
-from src.models_v1.analysis.decision import (
+from src.domain.agent.analysis.decision import (
     DecisionProposal,
     DecisionProposalStatus,
 )
-from src.models_v1.analysis.normalization import (
+from src.domain.agent.analysis.normalization import (
     NormalizationStatus,
     NormalizedItem,
     NormalizedQuotationArtifact,
 )
-from src.models_v1.analysis.risk import (
+from src.domain.agent.analysis.risk import (
     RiskSeverity,
 )
-from src.models_v1.analysis.tco import (
+from src.domain.agent.analysis.tco import (
     TCOCalculationStatus,
     TCOResult,
 )
-from src.models_v1.approval import (
+from src.domain.agent.approval import (
     BuyerAction,
     BuyerSubmitApprovalRequest,
 )
-from src.models_v1.quotation.confirmation import (
+from src.domain.agent.quotation.confirmation import (
     ConfirmedItemPayload,
     QuotationConfirmationRequest,
 )
-from src.models_v1.quotation.extraction import (
+from src.domain.agent.quotation.extraction import (
     ExtractionDraftPayload,
     ValidatedExtraction,
     ValidationSeverity,

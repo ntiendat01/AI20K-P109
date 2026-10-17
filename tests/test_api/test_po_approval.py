@@ -5,12 +5,12 @@ from decimal import Decimal
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from src.domain.procurement.contracts import PRStatus, PurchaseRequest, Quotation, QuotationItem, QuotationStatus
+from src.infrastructure.auth import DemoUser, create_session
+from src.infrastructure.quotation.repository import QuotationRepository
+from src.infrastructure.repositories.purchase_orders import PurchaseOrderRepository
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository
 from src.main import app
-from src.models.schemas import PRStatus, PurchaseRequest, Quotation, QuotationItem, QuotationStatus
-from src.services.auth import DemoUser, create_session
-from src.services.procurement.purchase_orders import PurchaseOrderRepository
-from src.services.procurement.purchase_requests import PurchaseRequestRepository
-from src.services.quotation.repository import QuotationRepository
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def manager_token():
     user = DemoUser(
         id="user-manager-01",
         name="Trần Văn Quản Lý",
-        email="manager@vinuni.edu.vn",
+        email="quanghuy@dotcom.vn",
         role="manager",
         password="Manager123!",
     )
@@ -31,7 +31,7 @@ def procurement_token():
     user = DemoUser(
         id="user-procurement-01",
         name="Nguyễn Minh Anh",
-        email="purchasing@vinuni.edu.vn",
+        email="anhnm@dotcom.vn",
         role="procurement",
         password="Purchase123!",
     )
@@ -151,6 +151,56 @@ async def test_manager_can_list_pending_approvals(sample_pr_and_quotes, manager_
 
 
 @pytest.mark.asyncio
+async def test_purchase_order_page_supports_search_sort_and_pagination(sample_pr_and_quotes, procurement_token):
+    from datetime import datetime
+
+    from src.api.routes import get_po_repository
+    from src.domain.procurement.contracts import PurchaseOrder, PurchaseOrderItem
+
+    _, _, po_repo, pr, quotes = sample_pr_and_quotes
+    item = PurchaseOrderItem(
+        product_name="Mặt hàng kiểm thử",
+        quantity=1,
+        unit_price=Decimal("1000000"),
+        line_total=Decimal("1000000"),
+    )
+    for index, code in enumerate(("PO-003", "PO-001", "PO-002"), start=1):
+        po_repo.create(PurchaseOrder(
+            id=f"po-page-{index}",
+            code=code,
+            pr_id=pr.id,
+            pr_code=pr.code,
+            quotation_id=quotes[0].id,
+            supplier_name=f"Nhà cung cấp {index}",
+            items=[item],
+            total_amount=Decimal(index * 1000000),
+            approver_id="manager-1",
+            approver_name="Quản lý kiểm thử",
+            approved_at=datetime(2026, 1, index),
+        ))
+    app.dependency_overrides[get_po_repository] = lambda: po_repo
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        first_page = await client.get(
+            "/api/v1/pos/page?page=1&page_size=2&sort_by=code&sort_direction=asc",
+            headers={"Authorization": f"Bearer {procurement_token}"},
+        )
+        filtered = await client.get(
+            "/api/v1/pos/page?query=Nh%C3%A0%20cung%20c%E1%BA%A5p%202&supplier=Nh%C3%A0%20cung%20c%E1%BA%A5p%202",
+            headers={"Authorization": f"Bearer {procurement_token}"},
+        )
+
+    app.dependency_overrides.clear()
+    assert first_page.status_code == 200
+    assert first_page.json()["total"] == 3
+    assert [row["code"] for row in first_page.json()["items"]] == ["PO-001", "PO-002"]
+    assert first_page.json()["page"] == 1
+    assert filtered.status_code == 200
+    assert filtered.json()["total"] == 1
+    assert filtered.json()["items"][0]["supplier_name"] == "Nhà cung cấp 2"
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("path", "payload"),
     [
@@ -175,7 +225,7 @@ async def test_po_code_collision_handling(sample_pr_and_quotes):
     _, _, po_repo, pr, quotes = sample_pr_and_quotes
     from datetime import datetime
 
-    from src.models.schemas import POStatus, PurchaseOrder, PurchaseOrderItem
+    from src.domain.procurement.contracts import POStatus, PurchaseOrder, PurchaseOrderItem
 
     item = PurchaseOrderItem(
         product_name="Mặt hàng 1", quantity=1, unit_price=Decimal("1000000"), line_total=Decimal("1000000")

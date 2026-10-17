@@ -3,11 +3,11 @@ import logging
 import pytest
 
 PROCUREMENT_CREDENTIALS = {
-    "email": "purchasing@vinuni.edu.vn",
+    "email": "anhnm@dotcom.vn",
     "password": "Purchase123!",
 }
 MANAGER_CREDENTIALS = {
-    "email": "manager@vinuni.edu.vn",
+    "email": "quanghuy@dotcom.vn",
     "password": "Manager123!",
 }
 
@@ -90,9 +90,8 @@ async def test_logout_revokes_token(client):
 
 
 @pytest.mark.asyncio
-async def test_login_frontend_is_served(client):
-    response = await client.get("/ui/")
+async def test_backend_exposes_health_below_api_prefix(client):
+    response = await client.get("/api/health")
 
     assert response.status_code == 200
-    assert "DotCom" in response.text
-    assert 'src="app.js"' in response.text
+    assert response.json()["status"] == "ok"

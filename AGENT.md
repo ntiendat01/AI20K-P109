@@ -15,10 +15,13 @@ Pattern: Orchestrator → Tool calling → Human-in-the-loop (HITL).
 
 ## Cấu trúc
 
-- `src/agent/`   — state.py (AgentState), graph.py (routing), nodes.py, tools.py
-- `src/api/`     — main.py, routes/, deps.py (chỉ validate và gọi graph)
-- `src/core/`    — config.py (Pydantic Settings), logging.py
-- `src/schemas/` — Pydantic schema: nguồn sự thật cho API contract
+- `src/main.py` — composition root FastAPI, middleware và router registration.
+- `src/api/` — HTTP transport: route, dependency và HTTP request/response.
+- `src/application/` — use case/workflow điều phối nghiệp vụ và agent.
+- `src/domain/` — Pydantic contracts cùng business rule thuần; là nguồn sự thật cho model mới.
+- `src/agents/` — LangGraph graph, state, node và deterministic tool.
+- `src/infrastructure/` — adapter OCR, LLM, PDF, repository và file/database.
+- `src/core/` — Pydantic Settings, logging và technical primitive dùng chung.
 - `eval/`        — datasets/ và scripts/
 - `tests/`       — unit/, integration/, fixtures/ (dữ liệu ẩn danh)
 - `docs/`        — specs/user-stories.md, adr/, diagrams/
@@ -30,6 +33,12 @@ Pattern: Orchestrator → Tool calling → Human-in-the-loop (HITL).
 - Python 3.11+, type hint cho hàm public; Pydantic cho mọi schema, không dict trần.
 - Không hardcode prompt, model name, đường dẫn; đọc từ `src/core/config.py`.
 - Log bằng `logging`, không `print`.
+
+## Frontend style guide
+
+- Mọi thay đổi giao diện phải tuân thủ [DotCom style guide](docs/STYLE_GUIDE.md).
+- Chỉ dùng token typography đã định nghĩa trong `frontend/styles.css` và font
+  Manrope. Không đặt `font-*` inline trong template JavaScript.
 
 ## Nguyên tắc 
 
@@ -70,7 +79,15 @@ Pattern: Orchestrator → Tool calling → Human-in-the-loop (HITL).
 - Từng bước nhỏ theo plan đã duyệt; không refactor ngoài phạm vi task.
 - Viết/cập nhật test cùng lúc với code.
 - Tuân thủ mục "Quy ước code" trong file này.
-- Giao tiếp giữa các module theo đúng schema trong `src/schemas/`.
+- Giao tiếp giữa các module theo contract trong `src/domain/`.
+
+## Ranh giới kiến trúc
+
+- `api` chỉ xử lý HTTP và gọi `application`; không gọi database/OCR/LLM trực tiếp.
+- `application` điều phối use case, gọi `domain`, `agents` và adapter cần thiết.
+- `domain` không import FastAPI, LangGraph, database, OCR, LLM hay filesystem.
+- `infrastructure` cài đặt chi tiết kỹ thuật và có thể import contract từ `domain`.
+- Contract nghiệp vụ nằm trong `src/domain/`; HTTP request/response nằm trong `src/api/contracts/`. Không tạo lại các namespace `src/models`, `src/services`, `src/extraction` hoặc `src/ocr`.
 
 ### 4. Kiểm tra (bắt buộc trước khi báo xong)
 - Chạy `make check`.

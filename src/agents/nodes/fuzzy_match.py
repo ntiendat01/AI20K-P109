@@ -8,8 +8,8 @@ extracted QuoteItems map to the same PR item.  Updates state with
 from __future__ import annotations
 
 from src.agents.state import ProcurementAgentState
-from src.models.fuzzy_match import BatchMatchResult
-from src.services.fuzzy_match import (
+from src.domain.fuzzy_match import BatchMatchResult
+from src.domain.matching import (
     PRItem,
     ProductMatchingService,
     QuoteItemInput,

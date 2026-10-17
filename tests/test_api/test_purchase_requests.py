@@ -4,15 +4,15 @@ from datetime import date, timedelta
 import pytest
 
 from src.main import app
-from src.services.procurement.purchase_requests import PurchaseRequestRepository, get_pr_repository
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository, get_pr_repository
 from tests.test_api.test_procurement_integration import completed_analysis
 
 PROCUREMENT_CREDENTIALS = {
-    "email": "purchasing@vinuni.edu.vn",
+    "email": "anhnm@dotcom.vn",
     "password": "Purchase123!",
 }
 MANAGER_CREDENTIALS = {
-    "email": "manager@vinuni.edu.vn",
+    "email": "quanghuy@dotcom.vn",
     "password": "Manager123!",
 }
 

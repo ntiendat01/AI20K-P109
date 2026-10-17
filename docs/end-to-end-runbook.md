@@ -25,18 +25,18 @@ commit key.
 | ----------------------- | ---------------------------------------------------------------- |
 | OpenAI GPT-6 Luna       | `OPENAI_API_KEY`, `LLM_PROVIDER=openai`, `MODEL_NAME=gpt-6-luna` |
 | JSON/độ trễ             | `OPENAI_REASONING_EFFORT=none`, `OPENAI_TIMEOUT_SECONDS=120`     |
-| PDF scan cần OCR hosted | `PADDLEOCR_BASE_URL`, `PADDLEOCR_ACCESS_TOKEN`                   |
+| PDF scan cần OCR service | `OCR_SERVICE_BASE_URL`, tùy chọn `OCR_SERVICE_TOKEN`             |
 
 PDF có text đọc bằng PyMuPDF; PDF scan chuyển sang PaddleOCR hosted. Model phải trả JSON theo contract; lỗi schema/evidence không được chuyển sang approval.
 
 ## Happy path trên UI
 
-1. Đăng nhập Buyer: `purchasing@vinuni.edu.vn` / `Purchase123!` (hoặc nút tài khoản demo).
+1. Đăng nhập Buyer: `anhnm@dotcom.vn` / `Purchase123!` (hoặc nút tài khoản demo).
 2. Tạo PR cho một mặt hàng, số lượng chung, ngân sách VND và hạn giao.
 3. Upload ít nhất hai báo giá từ NCC khác nhau. Chọn **Đọc và trích xuất bằng AI (PDF)** để dùng `extract_documents`; chọn parser để kiểm Mốc A trước.
 4. Đối chiếu file gốc. Xác nhận tên/mã hàng, UOM, số lượng, giá, VAT, phí, số ngày lịch sau xác nhận đơn và tháng bảo hành. Nút xác nhận đồng thời xác nhận tổng tiền gồm VAT hiển thị trên form.
 5. Mở comparison và bấm **Phân tích bằng Agent**. BE lập snapshot, ingest evidence, chạy `normalize → decision_llm → evaluate`. Chỉ trạng thái `awaiting_review` mới gửi duyệt được.
-6. Bấm **Gửi Quản lý phê duyệt**. Đăng xuất rồi đăng nhập Manager: `manager@vinuni.edu.vn` / `Manager123!`.
+6. Bấm **Gửi Quản lý phê duyệt**. Đăng xuất rồi đăng nhập Manager: `quanghuy@dotcom.vn` / `Manager123!`.
 7. Mở PR chờ duyệt, xem xếp hạng, số liệu, bằng chứng, đánh đổi và uncertainty. Bấm **Phê duyệt và tạo PO nháp**.
 8. Mở PO; tiền hàng, VAT bổ sung, phí và tổng phải khớp dữ liệu đã duyệt. Refresh đọc lại PO đã lưu. Retry cùng feedback không sinh PO thứ hai.
 

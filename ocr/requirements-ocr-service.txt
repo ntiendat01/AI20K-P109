@@ -1,0 +1,8 @@
+# Dependencies installed only in the isolated OCR service image.
+fastapi>=0.115.0
+uvicorn>=0.34.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+python-multipart>=0.0.20
+PyMuPDF>=1.25,<2
+-r requirements-ocr.txt

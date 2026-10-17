@@ -9,13 +9,13 @@ import pytest
 
 from src.api.routes import procurement_workflow
 from src.core.logging import JsonFormatter
-from src.extraction.service import process_pdf
-from src.models.purchase_request import PurchaseRequestCreate
-from src.services.auth import DEMO_USERS
-from src.services.evaluation.store import EvaluationStore
-from src.services.procurement.purchase_requests import PurchaseRequestRepository
-from src.services.quotation.parser import ExtractedQuotation
-from src.services.quotation.repository import QuotationRepository, source_text
+from src.infrastructure.documents.service import process_pdf
+from src.domain.purchase_request import PurchaseRequestCreate
+from src.infrastructure.auth import DEMO_USERS
+from src.infrastructure.evaluation.store import EvaluationStore
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository
+from src.application.quotation.parser import ExtractedQuotation
+from src.infrastructure.quotation.repository import QuotationRepository, source_text
 
 
 def test_structured_formatter_includes_operational_fields():
@@ -58,7 +58,7 @@ def test_database_connection_failure_is_logged(monkeypatch, tmp_path, caplog):
         del args, kwargs
         raise store_module.sqlite3.OperationalError("database unavailable")
 
-    from src.services.evaluation import store as store_module
+    from src.infrastructure.evaluation import store as store_module
 
     monkeypatch.setattr(store_module.sqlite3, "connect", fail_to_connect)
     caplog.set_level(logging.ERROR)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from src.models.procurement import (
+from src.domain.procurement.pipeline import (
     NormalizedLine,
     PRData,
     RawExtraction,

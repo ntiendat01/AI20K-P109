@@ -7,26 +7,18 @@ from pathlib import Path
 from typing import Annotated, cast
 from uuid import uuid4
 
-import csv
-import io
-from decimal import Decimal, InvalidOperation
-
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
-from fastapi.responses import JSONResponse
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel
 
 from src.agents.graph import build_graph
-from src.core.config import get_settings
-from src.models.evaluation import AnalysisRunResponse
-from src.models.pr import (
+from src.api.contracts.pr import (
     DocumentUploadResponse,
     PRCreateRequest,
     PRResponse,
 )
-from src.models.procurement import DecisionPipelineResponse, PRData
-
-
+from src.core.config import get_settings
+from src.domain.analysis.evaluation import AnalysisRunResponse
+from src.domain.procurement.pipeline import DecisionPipelineResponse, PRData
 
 MAX_DOCUMENTS = 10
 MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024
@@ -76,9 +68,6 @@ async def create_pr(request: PRCreateRequest) -> PRResponse:
         same_day_deadline=request.deadline == date.today(),
         document_count=0,
     )
-
-
-
 
 
 @router.post(
@@ -151,6 +140,7 @@ async def analyze_pr(case_id: str, request: Request) -> AnalysisRunResponse:
         result = await _run_analysis(initial_state, config, graph)
     except Exception as exc:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Procurement analysis failed") from exc
 

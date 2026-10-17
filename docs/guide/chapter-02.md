@@ -84,13 +84,13 @@ Sau khi clone, hãy mở thư mục dự án trong editor (khuyến nghị VS Co
 
 Mỗi thư mục phục vụ một mục đích cụ thể. Hãy hiểu rõ trước khi bắt đầu code:
 
-**`src/agent/`** — Nơi chứa toàn bộ logic AI Agent của bạn. File `graph.py` định nghĩa state graph (sơ đồ trạng thái) cho Agent, `state.py` chứa schema dữ liệu truyền giữa các node, `nodes.py` chứa các hàm xử lý logic tại mỗi bước, và `tools.py` chứa các công cụ mà Agent có thể sử dụng (tìm kiếm web, truy vấn database, gọi API, v.v.). Đây là "bộ não" của ứng dụng.
+**`src/agents/`** — Chứa LangGraph graph, state, các node và tool của Agent.
 
-**`src/api/`** — FastAPI backend. File `main.py` tạo ứng dụng FastAPI và cấu hình middleware. Thư mục `routes/` chứa các file định nghĩa API endpoints, mỗi file tương ứng với một nhóm chức năng. File `deps.py` quản lý dependency injection — ví dụ, tạo instance của Agent và inject vào các route handler.
+**`src/api/`** — FastAPI routes, dependencies và HTTP contracts. `src/main.py` tạo ứng dụng, cấu hình middleware và đăng ký router.
 
 **`src/core/`** — Cấu hình và tiện ích dùng chung. File `config.py` sử dụng pydantic-settings để load và validate biến môi trường. File `logging.py` thiết lập logging format.
 
-**`src/models/`** — Pydantic models cho request và response. Đây là "hợp đồng" giữa client và server — định nghĩa rõ dữ liệu gửi lên phải có dạng gì, và dữ liệu trả về sẽ có dạng gì.
+**`src/application/`** — Điều phối use case và workflow. **`src/domain/`** — Pydantic contract và quy tắc nghiệp vụ. **`src/infrastructure/`** — OCR, PDF, LLM và repository.
 
 **`tests/`** — Bài kiểm thử. `unit/` cho unit tests (test từng hàm riêng lẻ), `integration/` cho integration tests (test nhiều component hoạt động cùng nhau), và `eval/` cho Agent evaluation (đánh giá chất lượng trả lời của Agent).
 

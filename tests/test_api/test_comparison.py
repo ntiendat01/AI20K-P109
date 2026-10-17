@@ -5,16 +5,16 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.main import app
-from src.models.schemas import (
+from src.domain.procurement.contracts import (
     PRStatus,
     PurchaseRequest,
     Quotation,
     QuotationItem,
     QuotationStatus,
 )
-from src.services.auth import DemoUser, create_session
-from src.services.procurement.purchase_requests import PurchaseRequestRepository
-from src.services.quotation.repository import QuotationRepository
+from src.infrastructure.auth import DemoUser, create_session
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository
+from src.infrastructure.quotation.repository import QuotationRepository
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def procurement_token():
     user = DemoUser(
         id="user-procurement-01",
         name="Nguyễn Minh Anh",
-        email="purchasing@vinuni.edu.vn",
+        email="anhnm@dotcom.vn",
         role="procurement",
         password="Purchase123!",
     )
@@ -153,7 +153,7 @@ async def test_get_comparison_pr_not_found(procurement_token, tmp_path):
 
 
 def test_extract_warranty_and_payment_terms_robustness():
-    from src.services.procurement.comparison import analyze_payment_terms, extract_warranty_months
+    from src.application.procurement.comparison import analyze_payment_terms, extract_warranty_months
 
     # Test warranty
     assert extract_warranty_months("1 năm") == 12
@@ -195,7 +195,7 @@ def test_extract_warranty_and_payment_terms_robustness():
 
 
 def test_build_comparison_with_zero_budget(sample_pr, sample_quotations):
-    from src.services.procurement.comparison import build_comparison
+    from src.application.procurement.comparison import build_comparison
 
     _, pr = sample_pr
     _, quotes = sample_quotations

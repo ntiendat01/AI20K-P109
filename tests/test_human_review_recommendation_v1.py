@@ -1,4 +1,4 @@
-"""Tests for human_review_recommendation node and buyer_decision_router (HITL-2, models_v1).
+"""Tests for human_review_recommendation node and buyer_decision_router agent contracts.
 
 Adheres to Black-Box Boundary Testing:
 - Asserts exclusively on state['buyer_approval_request'] and router return string.
@@ -18,16 +18,16 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from src.models_v1.analysis.comparison import (
+from src.domain.agent.analysis.comparison import (
     ComparisonCell,
     SupplierComparisonMatrix,
 )
-from src.models_v1.analysis.decision import (
+from src.domain.agent.analysis.decision import (
     DecisionProposal,
     DecisionProposalStatus,
     TradeOff,
 )
-from src.models_v1.approval import (
+from src.domain.agent.approval import (
     BuyerAction,
     BuyerSubmitApprovalRequest,
 )

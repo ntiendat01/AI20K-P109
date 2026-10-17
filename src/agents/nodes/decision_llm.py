@@ -10,12 +10,12 @@ from pydantic import JsonValue, ValidationError
 
 from src.agents.state import ProcurementAgentState
 from src.core.config import Settings, get_settings
-from src.models_v1.analysis.decision import (
+from src.domain.agent.analysis.decision import (
     DecisionProposal,
     DecisionProposalStatus,
 )
-from src.models_v1.analysis.tco import TCOCalculationStatus, TCOResult
-from src.services.llm import get_llm, resolve_llm_provider
+from src.domain.agent.analysis.tco import TCOCalculationStatus, TCOResult
+from src.infrastructure.llm import get_llm, resolve_llm_provider
 
 DEFAULT_TOP_N: Final = 3
 MIN_TOP_N: Final = 1
@@ -44,13 +44,13 @@ def build_legacy_decision_payload(
     state: Mapping[str, object],
     risk_flags: list[object],
 ) -> dict[str, object]:
-    """Build the previous evaluation contract payload without altering the v1 node.
+    """Build the previous evaluation contract payload without altering the agent node.
 
     The evaluation API still accepts this contract for historical recommendations,
     so its retry boundary remains available while current analysis uses
     :func:`decision_llm` above.
     """
-    from src.models.evaluation import DecisionProposal as LegacyDecisionProposal
+    from src.domain.analysis.evaluation import DecisionProposal as LegacyDecisionProposal
 
     return {
         "schema": LegacyDecisionProposal.model_json_schema(),
@@ -116,10 +116,10 @@ def decision_proposal(
     """Validate and retry the legacy DecisionProposal contract at its boundary.
 
     This adapter is deliberately isolated from ``decision_llm``.  New analysis
-    runs use the v1 proposal model; existing evaluation records retain their
+    runs use the agent proposal model; existing evaluation records retain their
     strict JSON retry and disclosure-only risk behavior.
     """
-    from src.models.evaluation import DecisionProposal as LegacyDecisionProposal
+    from src.domain.analysis.evaluation import DecisionProposal as LegacyDecisionProposal
 
     settings = get_settings()
     messages: list[DecisionMessage] = [

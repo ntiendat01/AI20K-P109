@@ -1,4 +1,4 @@
-"""Tests for decision_llm node verifying Input/Output contracts (models_v1).
+"""Tests for decision_llm node verifying strict agent Input/Output contracts.
 
 Adheres to Black-Box Boundary Testing:
 - Asserts exclusively on state['decision_proposal'] and its domain contract attributes.
@@ -21,20 +21,20 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import JsonValue
 
-from src.models_v1.analysis.comparison import (
+from src.domain.agent.analysis.comparison import (
     ComparisonCell,
     SupplierComparisonMatrix,
 )
-from src.models_v1.analysis.decision import (
+from src.domain.agent.analysis.decision import (
     DecisionProposal,
     DecisionProposalStatus,
     TradeOff,
 )
-from src.models_v1.analysis.risk import (
+from src.domain.agent.analysis.risk import (
     RiskFlag,
     RiskSeverity,
 )
-from src.models_v1.analysis.tco import (
+from src.domain.agent.analysis.tco import (
     TCOCalculationStatus,
     TCOResult,
 )

@@ -8,28 +8,28 @@ import fitz
 import pytest
 from pypdf import PdfWriter
 
-from src.extraction.pdf_extractor import ExtractedDocument
+from src.infrastructure.documents.pdf_extractor import ExtractedDocument
 from src.main import app
-from src.models.extracted_quotation import ExtractedPage
-from src.models.quotation.confirmation import Quotation
-from src.models.schemas import QuotationConfirmation
-from src.models_v1.quotation.extraction import (
+from src.domain.agent.quotation.extraction import (
     ExtractedFieldValue,
     ExtractedItemField,
     ExtractionDraftPayload,
     FieldSource,
 )
-from src.services.procurement.purchase_requests import PurchaseRequestRepository, get_pr_repository
-from src.services.quotation.intake import extract_for_quotation, resume_confirmation
-from src.services.quotation.parser import extract_quotation
-from src.services.quotation.repository import QuotationRepository, get_quotation_repository
+from src.domain.quotation.extraction import ExtractedPage
+from src.domain.quotation.confirmation import Quotation
+from src.domain.procurement.contracts import QuotationConfirmation
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository, get_pr_repository
+from src.application.quotation.intake import extract_for_quotation, resume_confirmation
+from src.application.quotation.parser import extract_quotation
+from src.infrastructure.quotation.repository import QuotationRepository, get_quotation_repository
 
 PROCUREMENT_CREDENTIALS = {
-    "email": "purchasing@vinuni.edu.vn",
+    "email": "anhnm@dotcom.vn",
     "password": "Purchase123!",
 }
 MANAGER_CREDENTIALS = {
-    "email": "manager@vinuni.edu.vn",
+    "email": "quanghuy@dotcom.vn",
     "password": "Manager123!",
 }
 
@@ -121,7 +121,7 @@ def test_repository_reads_legacy_currency_evidence_without_changing_other_record
 
 
 def test_agent_intake_projects_v1_draft_to_legacy_review_contract(tmp_path):
-    """The v1 evidence wrapper must not leak into the legacy review record."""
+    """The agent evidence wrapper must not leak into the legacy review record."""
     source_path = tmp_path / "quote.pdf"
     source_path.write_bytes(b"%PDF-1.7 fixture")
     quotation = Quotation(
@@ -154,6 +154,7 @@ def test_agent_intake_projects_v1_draft_to_legacy_review_contract(tmp_path):
                     "vat_included": False,
                     "lead_time_days": 7,
                     "warranty_months": 12,
+                    "payment_terms": "Thanh toán trong 30 ngày",
                     "page_number": 1,
                     "confidence_score": 0.95,
                 }
@@ -163,11 +164,13 @@ def test_agent_intake_projects_v1_draft_to_legacy_review_contract(tmp_path):
 
     assert extracted.supplier_name == "Nhà cung cấp A"
     assert extracted.currency == "VND"
+    assert extracted.payment_terms == "Thanh toán trong 30 ngày"
     assert [(item.product_name, item.quantity, item.unit_price) for item in extracted.items] == [
         ("Thép thanh", 10, 150000)
     ]
     assert agent_lines[0]["currency"] == "VND"
     assert agent_lines[0]["item_name"] == "Thép thanh"
+    assert agent_lines[0]["payment_terms"] == "Thanh toán trong 30 ngày"
     assert agent_lines[0]["source"]["page_number"] == 1
 
 
@@ -225,7 +228,7 @@ def test_agent_intake_keeps_confirmable_lines_in_lockstep_with_agent_extractions
             del state, config
             return {"raw_extractions": [draft.model_dump(mode="json")]}
 
-    monkeypatch.setattr("src.services.quotation.intake.intake_graph", lambda **_: Graph())
+    monkeypatch.setattr("src.application.quotation.intake.intake_graph", lambda **_: Graph())
 
     extracted, agent_lines, _ = extract_for_quotation(quotation)
 
@@ -310,7 +313,7 @@ def test_multi_page_price_list_keeps_rows_without_quantity_or_line_total(monkeyp
             (2, [header, ["2", "Băng keo OPP", "Khổ 4.8cm", "Cây", "62.000"]]),
         ],
     )
-    monkeypatch.setattr("src.services.quotation.parser.extract_pdf", lambda content: document)
+    monkeypatch.setattr("src.application.quotation.parser.extract_pdf", lambda content: document)
 
     extracted = extract_quotation(b"%PDF-catalog", ".pdf")
 

@@ -1,0 +1,5 @@
+# Local development and test tooling. Do not install in production images.
+ruff>=0.8.0
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+PyMuPDF>=1.25,<2  # PDF fixture generation in scripts/smoke_procurement_live.py

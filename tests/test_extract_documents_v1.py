@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from src.agents.nodes.extract_documents import extract_documents
-from src.models_v1.quotation.extraction import ExtractionDraftPayload
+from src.domain.agent.quotation.extraction import ExtractionDraftPayload
 
 
 class FakeOCRClient:
@@ -24,7 +25,7 @@ class FakeExtractionClient:
         return self.items
 
 
-def test_extract_documents_returns_models_v1_draft(tmp_path: Path) -> None:
+def test_extract_documents_returns_agent_contract_draft(tmp_path: Path) -> None:
     document = tmp_path / "quote.pdf"
     document.write_bytes(b"%PDF-1.7 fixture")
     first_item: dict[str, object] = {
@@ -78,3 +79,42 @@ def test_extract_documents_returns_empty_v1_draft_for_unreadable_document(tmp_pa
 
     draft = ExtractionDraftPayload.model_validate(result["raw_extractions"][0])
     assert draft == ExtractionDraftPayload()
+
+
+def test_extract_documents_uses_ocr_confidence_in_parsed_json(tmp_path: Path) -> None:
+    document = tmp_path / "quote.pdf"
+    document.write_bytes(b"%PDF-1.7 fixture")
+    ocr_payload = json.dumps(
+        {
+            "pages": [
+                {
+                    "page_number": 1,
+                    "raw_text": "Laptop\n15.000.000",
+                    "lines": [
+                        {"text": "Laptop", "confidence": 0.97},
+                        {"text": "15.000.000", "confidence": 0.83},
+                    ],
+                }
+            ]
+        }
+    )
+    llm_item: dict[str, object] = {
+        "item_name": "Laptop",
+        "unit_price": 15_000_000,
+        "currency": "VND",
+        "page_number": 1,
+        "source_text": "Laptop\n15.000.000",
+        "confidence_score": 0.99,
+        "field_confidence": {"item_name": 0.99, "unit_price": 0.99},
+    }
+
+    result = extract_documents(
+        {"documents": [str(document)]},
+        ocr_client=FakeOCRClient(ocr_payload),
+        extraction_client=FakeExtractionClient([llm_item]),
+    )
+
+    draft_json = result["raw_extractions"][0]
+    draft = ExtractionDraftPayload.model_validate(draft_json)
+    assert str(draft.items[0].product_name.confidence) == "0.97"
+    assert str(draft.items[0].unit_price.confidence) == "0.83"

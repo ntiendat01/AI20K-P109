@@ -18,7 +18,7 @@ Evaluation sau quyết định: services/evaluation/ có engine, grounding, vali
 Di sản còn lại:
 POST /api/v1/chat gọi agent.ainvoke({"query": ...}) trên graph procurement, sẽ không chạy đúng.
 /prs/{id}/comparison và hai route /analyze, /decision-pipeline đã deprecated.
-Có hai bộ model song song là models/ và models_v1/ (kèm models/old/). Điều này gây rủi ro lệch contract.
+Trước đây có hai model root song song là `models/` và `models_v1/`; strict agent contract hiện đã chuyển vào `src/models/agent`.
 Agent (LangGraph)
 
 Graph nằm ở src/agents/graph.py với state ProcurementAgentState. Luồng thực tế:
@@ -36,25 +36,11 @@ Cách BE dùng graph: BE gọi build_graph(confirmed_input=True), bỏ qua bư�
 Lệch so với ARCHITECTURE.md:
 process_feedback và generate_evidence không còn trong graph. Vòng revise không nằm trong graph, evidence do services/evaluation xử lý.
 evaluate_sufficiency chỉ còn nằm trong evaluate.py mà không được nối vào graph.
-Đường dẫn file trong ARCHITECTURE.md và AGENT.md (src/agent/, src/schemas/, src/api/main.py) không khớp cấu trúc thật (src/agents/, src/models_v1/, src/main.py).
+Đường dẫn file trong ARCHITECTURE.md và AGENT.md (src/agent/, src/schemas/, src/api/main.py) không khớp cấu trúc thật (src/agents/, src/models/agent/, src/main.py).
 Hai điểm khác khi so với ARCHITECTURE.md/AGENT.md: AGENTS.md mà CLAUDE.md tham chiếu không tồn tại, file thật là AGENT.md. make check hiện chạy lint format test và không có typecheck.
-Monitor
+Observability
 
-Monitor là package monitor/ theo Facade pattern:
-
-MonitorFacade gom hai adapter tracing (LangSmith, Langfuse) và SystemAdapter (CPU/RAM qua psutil, log JSON).
-Các hàm nghiệp vụ là log_hitl_interrupt, log_revision_loop (cảnh báo khi revise_count >= 3), log_early_exit và log_llm_node.
-monitor/docker-compose.yml dựng Langfuse v2 với Postgres. Secret là mysecret/mysalt và mật khẩu DB là postgres; file đã ghi chú là phải đổi khi deploy thật.
-
-Vấn đề chính: monitor chưa được nối vào hệ thống thật.
-
-grep không thấy dòng nào trong src/ import monitor. Chỉ mock_simulator.py dùng nó, và script đó còn bơm số liệu giả (token 120/45, 600/150).
-build_graph() và execute_analysis() không truyền callbacks, nên trace không lên Langfuse hay LangSmith khi chạy thật.
-langfuse và psutil không có trong requirements.txt. Adapter xử lý thiếu thư viện bằng cách trả list rỗng hoặc ghi lỗi, nên sự cố này im lặng.
-MAX_REVISE_COUNT định nghĩa trong monitor, nhưng human_review_recommendation.py hard-code 3.
-src/core/config.py cũng có cấu hình LangSmith riêng (langchain_tracing_v2 mặc định True), trùng chức năng với monitor/config.
-Mock đang gọi agent.invoke với state {"metadata": ..., "revise_count": 0}, không khớp ProcurementAgentState.
+LangSmith tracing dùng trực tiếp biến môi trường LangChain/LangSmith và các decorator `@traceable` ở luồng trích xuất. Package `monitor/` và stack Langfuse demo đã bị loại bỏ vì không được kết nối vào runtime thật; không còn callback facade hay mock simulator.
 Đề xuất bước tiếp theo
 Sửa frontend/Dockerfile để copy đủ thư mục FE, hoặc bỏ image nginx nếu chỉ phục vụ qua backend.
-Nối monitor vào execute_analysis bằng cách truyền callbacks và thread_id, kèm bổ sung dependency, rồi đo lại bằng make eval.
 Dọn /chat, các route deprecated và models/old/. Đồng bộ ARCHITECTURE.md, AGENT.md với code thật.

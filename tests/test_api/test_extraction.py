@@ -1,18 +1,21 @@
 """Generated PDF fixtures exercise the extraction pipeline and batch API."""
 
+import json
 from datetime import date, timedelta
 
 import fitz
 import pytest
 
-from src.extraction.detector import detect_pdf_type
-from src.extraction.pdf_extractor import ExtractedDocument
-from src.extraction.quotation_parser import parse_number, parse_quotation
-from src.extraction.service import process_pdf
+from src.infrastructure.documents.detector import detect_pdf_type
+from src.infrastructure.documents.pdf_extractor import ExtractedDocument, PDFTextExtractor
+from src.infrastructure.documents.quotation_parser import parse_number, parse_quotation
+from src.infrastructure.documents.service import process_pdf
 from src.main import app
-from src.models.extracted_quotation import ExtractionStatus, Quotation
-from src.models.quotation.extraction import ExtractedPage
-from src.services.procurement.purchase_requests import PurchaseRequestRepository, get_pr_repository
+from src.domain.quotation.extraction import ExtractedQuotation as Quotation
+from src.domain.quotation.extraction import ExtractionStatus
+from src.domain.quotation.extraction import ExtractedPage
+from src.infrastructure.ocr.contracts import OCRLine, OCRPage
+from src.infrastructure.repositories.purchase_requests import PurchaseRequestRepository, get_pr_repository
 
 QUOTE = """Supplier: ABC Technology
 Quotation No: ABC-2026-0918
@@ -68,7 +71,7 @@ def scanned_pdf() -> bytes:
 
 
 def test_clean_text_pdf_preserves_raw_values_and_skips_ocr(monkeypatch):
-    monkeypatch.setattr("src.extraction.pdf_extractor.ocr_page", lambda page: pytest.fail("OCR called for text PDF"))
+    monkeypatch.setattr("src.infrastructure.documents.pdf_extractor.ocr_page_data", lambda page: pytest.fail("OCR called for text PDF"))
     result = process_pdf("quote.pdf", pdf_with_text(QUOTE))
     assert result.status == ExtractionStatus.COMPLETED
     assert result.document_type == "text"
@@ -121,9 +124,9 @@ def test_scanned_pdf_uses_ocr_and_mixed_detection(tmp_path, monkeypatch):
 
     def fake_ocr(page):
         calls.append(page.number)
-        return QUOTE
+        return OCRPage(page_number=1, raw_text=QUOTE)
 
-    monkeypatch.setattr("src.extraction.pdf_extractor.ocr_page", fake_ocr)
+    monkeypatch.setattr("src.infrastructure.documents.pdf_extractor.ocr_page_data", fake_ocr)
     scan = scanned_pdf()
     path = tmp_path / "scan.pdf"
     path.write_bytes(scan)
@@ -141,6 +144,29 @@ def test_scanned_pdf_uses_ocr_and_mixed_detection(tmp_path, monkeypatch):
     document.close()
     scan_document.close()
     assert detect_pdf_type(str(path)) == "mixed"
+
+
+def test_pdf_text_extractor_preserves_ocr_line_confidence(tmp_path, monkeypatch):
+    path = tmp_path / "scan.pdf"
+    path.write_bytes(scanned_pdf())
+    monkeypatch.setattr(
+        "src.infrastructure.documents.pdf_extractor.ocr_page_data",
+        lambda _page: OCRPage(
+            page_number=1,
+            raw_text="Laptop",
+            lines=[OCRLine(text="Laptop", confidence=0.97)],
+        ),
+    )
+
+    payload = json.loads(PDFTextExtractor().extract_text(str(path)))
+
+    assert payload["pages"] == [
+        {
+            "page_number": 1,
+            "raw_text": "Laptop",
+            "lines": [{"text": "Laptop", "confidence": 0.97}],
+        }
+    ]
 
 
 def test_missing_fields_remain_null():
@@ -182,7 +208,7 @@ def repository(tmp_path):
 @pytest.mark.asyncio
 async def test_batch_extracts_independently_and_reports_corruption(client, repository):
     login = await client.post(
-        "/api/v1/auth/login", json={"email": "purchasing@vinuni.edu.vn", "password": "Purchase123!"}
+        "/api/v1/auth/login", json={"email": "anhnm@dotcom.vn", "password": "Purchase123!"}
     )
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
     created = await client.post(
